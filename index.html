@@ -12,7 +12,7 @@
     color: #1A1A1A;
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Mincho ProN", "Yu Mincho", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
     -webkit-font-smoothing: antialiased;
-    padding-bottom: 300px; /* room for sticky control bar (mic/clear/export/send + textarea) */
+    padding-bottom: 33vh; /* Phase 2: reserve lower third for control bar (manuscript gets ~2/3) */
   }
 
   /* ---- Header ---- */
@@ -92,6 +92,8 @@
     word-break: break-all;
     overflow-wrap: break-word;
   }
+  /* Phase 2: manuscript reading area is the star (≈ upper two-thirds) */
+  body.p2 main { min-height: 60vh; }
 
   /* ---- Sticky control bar ---- */
   .control-bar {
@@ -99,16 +101,23 @@
     left: 0;
     right: 0;
     bottom: 0;
+    height: 33vh;            /* Phase 2: controls ≈ lower third */
+    min-height: 200px;
+    max-height: 340px;
+    display: flex;
+    align-items: stretch;
     background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid #ececec;
-    padding: 18px 20px 20px;
+    padding: 14px 20px 16px;
     z-index: 100;
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
   }
   .control-inner {
     max-width: 720px;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -198,7 +207,9 @@
 
   .memo-area {
     width: 100%;
-    height: 120px;
+    flex: 1 1 auto;       /* fill remaining height in the control bar */
+    height: auto;
+    min-height: 80px;
     padding: 12px 14px;
     border: 1.5px solid #d8d6d0;
     border-radius: 8px;
@@ -452,7 +463,7 @@
     main h3 { font-size: 15.5px; }
 
     /* ---- compact control bar (Phase 2 only) ---- */
-    .control-bar { padding: 10px 12px 12px; }
+    .control-bar { padding: 8px 12px 10px; height: 40vh; min-height: 228px; max-height: 320px; }
     .control-inner { gap: 8px; }
     .control-row1 { gap: 8px; }
     .mic-btn { order: 1; flex: 1 0 100%; height: 50px; min-width: 0; font-size: 15.5px; }
@@ -464,10 +475,10 @@
     .clear-btn { order: 3; } .export-btn { order: 4; } .send-btn { order: 5; }
     .lbl-full { display: none; }   /* swap to short labels on mobile */
     .lbl-short { display: inline; }
-    .memo-area { height: 78px; font-size: 16px; } /* 16px = avoid iOS focus zoom */
+    .memo-area { flex: 1 1 auto; height: auto; min-height: 56px; font-size: 16px; } /* 16px = avoid iOS focus zoom */
 
-    body { padding-bottom: 300px; } /* compact bar + control-hint line */
-    .toast { bottom: 316px; }
+    body { padding-bottom: 40vh; } /* match mobile control bar; manuscript gets the rest */
+    .toast { bottom: calc(40vh + 14px); }
     .control-hint { font-size: 11.5px; }
     .version-toggle { top: 52px; right: 8px; } /* sits just under phase-nav */
     .ver-btn { padding: 8px 11px; font-size: 11.5px; }
@@ -1418,7 +1429,7 @@
 <section id="phase-3" class="phase">
   <div class="phase-wrap">
     <h2 class="phase-title">③ distributor ダッシュボード</h2>
-    <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開・比較・発信管理(編集OS)。変換は「⚡」ボタンで枠生成 → Claude に貼り付け依頼 → 各欄へペースト → 発信準備OK に進める。</p>
+    <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開・比較・発信管理(編集OS)。「⚡ note正本から6媒体に変換」で各媒体へ下書きを自動生成 → カードで編集 → 発信準備OK に進める。<br>※ 外部AI API は未使用の簡易テンプレート変換です(英語化・精緻化は別途)。上限超過は自動トリム。</p>
 
     <div class="p3-go-banner" id="p3-go-banner"></div>
     <div class="p3-warning" id="p3-warning"></div>
@@ -1433,14 +1444,8 @@
       </div>
     </div>
 
-    <div class="source-box" id="dist-source">
-      <span class="src-label">入力(note 正本 / Phase 2 v2 本文)</span>
-      <span id="dist-source-text">(Phase 2 の本文を読み込みます…)</span>
-    </div>
-
     <div class="action-row">
-      <button type="button" class="convert-btn" id="convert-btn">⚡ 6媒体に変換(枠を生成)</button>
-      <button type="button" class="prompt-btn" id="dist-prompt-btn">📋 Claudeに変換依頼プロンプトをコピー</button>
+      <button type="button" class="convert-btn" id="convert-btn">⚡ note正本から6媒体に変換</button>
     </div>
 
     <div class="p3-controls">
@@ -1991,9 +1996,60 @@
   }
   function refreshDistSource(){
     const el = document.getElementById('dist-source-text');
-    if (!el) return;
+    if (!el) return; // ② 正本プレビュー枠は削除済み(本関数は no-op になる)
     const src = getSourceNote();
     el.textContent = src ? (src.length > 400 ? src.slice(0, 400) + ' …' : src) : '(Phase 2 に本文がありません)';
+  }
+
+  // ---- ① 媒体別テンプレート変換(フロント内 / 外部APIなし / 上限で自動トリム) ----
+  function splitParas(t){ return t.split(/\n{2,}/).map(function(s){ return s.trim(); }).filter(Boolean); }
+  function splitSentences(t){
+    var clean = t.replace(/\n+/g, ''); var out = []; var cur = '';
+    for (var i = 0; i < clean.length; i++){ cur += clean[i]; if ('。！？!?'.indexOf(clean[i]) >= 0){ out.push(cur.trim()); cur = ''; } }
+    if (cur.trim()) out.push(cur.trim());
+    return out.filter(Boolean);
+  }
+  function trimTo(s, n){ if (s.length <= n) return s; return s.slice(0, n - 1).replace(/[\s　]+$/, '') + '…'; }
+  var AICO_TAGS = '#AIco #メディア #編成 #YouTube #放送';
+  function buildMediaText(id, title, body, limit){
+    var paras = splitParas(body);
+    var sents = splitSentences(body);
+    var lead = paras[0] || title;
+    var hook = sents[0] || title;
+    var tail = paras.length ? paras[paras.length - 1] : '';
+    var text = '';
+    switch (id){
+      case 'note_jp':
+        text = '# ' + title + '\n\n' + body;
+        break;
+      case 'substack_medium':
+        text = '[Suggested EN headline] ' + title + ' — for a global audience\n' +
+               '※ EN展開前提の構成(現状は日本語ベース。英語化時にローカライズ)\n\n' +
+               '## Hook\n' + lead + '\n\n## Body (JP base)\n' + body + '\n\n## Takeaway\n' + tail;
+        break;
+      case 'linkedin_en':
+        text = '【結論】' + hook + '\n\n' + paras.slice(0, 2).join('\n\n') +
+               '\n\n【問い】あなたの現場では、これはどう映るでしょうか?\n\n' + AICO_TAGS;
+        break;
+      case 'x_thread': {
+        var pts = sents.slice(0, 4).map(function(s, i){ return (i + 1) + '/ ' + trimTo(s, 120); }).join('\n\n');
+        text = title + '\n\n' + pts + '\n\n→ 続きは note で(リンク)\n#AIco';
+        break;
+      }
+      case 'instagram_carousel':
+        text = '✍️ ' + title + '\n\n' + hook + (sents[1] ? '\n' + sents[1] : '') +
+               '\n\n保存して後で読む📌 / プロフィールのリンクから全文へ\n\n' + AICO_TAGS + ' #コンテンツ #地方創生';
+        break;
+      case 'youtube_desc': {
+        var yp = sents.slice(0, 3).map(function(s){ return '・' + trimTo(s, 60); }).join('\n');
+        text = title + '\n\n【この動画について】\n' + lead + '\n\n【見どころ】\n' + (yp || '・(本文から自動抽出)') +
+               '\n\n【関連リンク】\n・note記事:(リンク)\n・Substack:(リンク)\n\n' + AICO_TAGS;
+        break;
+      }
+      default:
+        text = title + '\n\n' + body;
+    }
+    return trimTo(text.trim(), limit);
   }
 
   function setPhase(n){
@@ -2378,36 +2434,16 @@
     var title = getSourceTitle();
     if (!src) { showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
     var filled = MEDIA.filter(function(m) { return distData[m.id].text.trim(); });
-    if (filled.length && !confirm('既存の変換結果(' + filled.length + '媒体)を上書きしてプレースホルダを再生成します。よろしいですか?')) return;
+    if (filled.length && !confirm('既存の変換結果(' + filled.length + '媒体)を上書きして再生成します。よろしいですか?')) return;
     MEDIA.forEach(function(m) {
-      distData[m.id].text =
-        '【' + m.label + ' 向け変換結果プレースホルダ】\n' +
-        '— ' + m.hint + '\n' +
-        '— 上限の目安: ' + m.limit + '字\n\n' +
-        (m.id === 'note_jp'
-          ? ('[タイトル] ' + title + '\n\n' + src)
-          : 'ここに「' + m.label + '」向けの変換結果を貼り付け/編集してください。\n(自動変換は別タスク: 📋ボタンで Claude 用プロンプトを取得 → claude.ai で生成)');
+      distData[m.id].text = buildMediaText(m.id, title, src, m.limit); // ① 全媒体に本文を生成(空欄にしない)
     });
     saveDistData();
     MEDIA.forEach(function(m) { updateCard(m.id); });
     updateProgress();
     updateWarning();
     if (sortByStatus) sortGrid();
-    showToast('⚡ 6媒体の枠を生成しました(note_jp は正本を投入済)。', null, 2600);
-  });
-
-  document.getElementById('dist-prompt-btn').addEventListener('click', async function() {
-    var src = getSourceNote();
-    var title = getSourceTitle();
-    if (!src) { showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
-    var p = 'distributor フェーズ1(変換)を実行してほしい。note 正本を 6媒体へ展開する。\n\n';
-    p += '【AIco言語ポリシー v1.6 準拠】note JP本館 / Substack+Medium EN / LinkedIn ENハブ / X 70:30 / Instagram 70:30 / YouTube概要欄。note と Substack は並列生成(翻訳ではない)、70%共通 + 30%市場別独自。\n\n';
-    p += '【媒体別仕様】\n';
-    MEDIA.forEach(function(m) { p += '- ' + m.label + '(id:' + m.id + ', 上限目安' + m.limit + '字): ' + m.hint + '\n'; });
-    p += '\n【入力 note 正本】\n[タイトル] ' + title + '\n\n' + src + '\n\n';
-    p += '【出力】6媒体それぞれの本文を、媒体id(' + MEDIA.map(function(m) { return m.id; }).join(' / ') + ')を見出しにして返してほしい。AI言語率≦30% / ブランド guardrails(本名露出なし)厳守。\n';
-    try { await navigator.clipboard.writeText(p); showToast('📋 変換依頼プロンプトをコピー\nclaude.ai に貼り付けて生成 → 結果を各媒体欄へ。', null, 2800); }
-    catch(err) { console.log(p); showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000); }
+    showToast('⚡ note正本をもとに6媒体へ下書きを生成しました。各カードで編集→コピーできます。', null, 2800);
   });
 
   document.getElementById('to-verifier-btn').addEventListener('click', function() {
