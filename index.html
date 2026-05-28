@@ -602,6 +602,216 @@
   }
   .copy-btn:hover { background: #333; }
 
+  /* ---- Phase 3: progress bar ---- */
+  .p3-progress-wrap { margin: 0 0 18px; }
+  .p3-progress-label {
+    font-size: 12px; color: #888; margin-bottom: 6px;
+    font-family: -apple-system, sans-serif; display: flex; justify-content: space-between;
+  }
+  .p3-progress-label strong { color: #2a9d4a; }
+  .p3-progress-bar-bg {
+    height: 6px; background: #ececec; border-radius: 3px; overflow: hidden;
+  }
+  .p3-progress-bar-fill {
+    height: 100%; background: #2a9d4a; border-radius: 3px;
+    transition: width .3s ease;
+  }
+
+  /* ---- Phase 3: panel spec (3-line) ---- */
+  .panel-spec {
+    background: #FAFAF7; border-left: 3px solid #d4cfc0;
+    padding: 10px 12px; border-radius: 0 4px 4px 0; margin-bottom: 10px;
+    font-size: 12px; color: #666; line-height: 1.8;
+    font-family: -apple-system, sans-serif;
+  }
+  .panel-spec-row { display: flex; gap: 6px; }
+  .panel-spec-key { color: #aaa; font-weight: 700; min-width: 48px; flex: none; }
+  .panel-spec-val { color: #555; }
+
+  /* ---- Phase 3: status selector ---- */
+  .status-select {
+    height: 34px; padding: 0 10px; border: 1.5px solid #d8d6d0; border-radius: 17px;
+    font-size: 12.5px; font-weight: 600; cursor: pointer; background: #fff;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: border-color .15s;
+  }
+  .status-select:focus { outline: none; border-color: #c0392b; }
+  .status-select.st-draft       { color: #888; border-color: #d8d6d0; }
+  .status-select.st-reviewing   { color: #E67E22; border-color: #E67E22; }
+  .status-select.st-waiting_verifier { color: #2980B9; border-color: #2980B9; }
+  .status-select.st-ready       { color: #2a9d4a; border-color: #2a9d4a; }
+
+  /* Tab status dot overrides */
+  .media-tab .filled-dot.st-draft       { background: #bbb; }
+  .media-tab .filled-dot.st-reviewing   { background: #E67E22; }
+  .media-tab .filled-dot.st-waiting_verifier { background: #2980B9; }
+  .media-tab .filled-dot.st-ready       { background: #2a9d4a; }
+
+  /* ---- Phase 3: to-verifier button ---- */
+  .to-verifier-btn {
+    display: block; width: 100%; margin-top: 20px;
+    background: #2a9d4a; color: #fff; border: none; height: 50px;
+    border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    box-shadow: 0 4px 14px rgba(42,157,74,0.25); transition: background .15s, transform .1s;
+  }
+  .to-verifier-btn:hover { background: #228840; transform: translateY(-1px); }
+  .to-verifier-btn:active { transform: translateY(0); }
+
+  /* ---- Phase 4: p3 status summary ---- */
+  .p3-summary {
+    background: #F7F9FC; border: 1px solid #dce6f0; border-radius: 9px;
+    padding: 14px 16px; margin-bottom: 20px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p3-summary-title {
+    font-size: 11px; font-weight: 700; color: #999; letter-spacing: 0.07em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .p3-summary-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px;
+  }
+  .p3-summary-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12.5px; color: #444;
+  }
+  .p3-summary-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex: none;
+  }
+  .p3-summary-dot.st-draft            { background: #bbb; }
+  .p3-summary-dot.st-reviewing        { background: #E67E22; }
+  .p3-summary-dot.st-waiting_verifier { background: #2980B9; }
+  .p3-summary-dot.st-ready            { background: #2a9d4a; }
+  .p3-summary-dot.st-empty            { background: #ddd; }
+  .p3-summary-dot.st-published        { background: #1a6b35; }
+
+  /* ---- Phase 3: card grid ---- */
+  .media-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .media-card {
+    border: 1.5px solid #e8e6e0; border-radius: 10px; padding: 13px 14px; background: #fff;
+    transition: border-color .15s, box-shadow .15s, opacity .15s;
+  }
+  .media-card:hover { border-color: #c0c0c0; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .media-card.selected { border-color: #c0392b !important; box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+  .media-card.st-published {
+    border-color: #1a6b35; border-width: 2px; opacity: 0.72;
+  }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;
+  }
+  .card-name {
+    font-size: 12.5px; font-weight: 700; color: #1A1A1A;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .card-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9px;
+    font-family: -apple-system, sans-serif; white-space: nowrap;
+  }
+  .card-badge.st-empty            { background: #f0eee8; color: #bbb; }
+  .card-badge.st-draft            { background: #f0eee8; color: #888; }
+  .card-badge.st-reviewing        { background: #fef0e4; color: #E67E22; }
+  .card-badge.st-waiting_verifier { background: #e8f0fa; color: #2980B9; }
+  .card-badge.st-ready            { background: #e8f5ec; color: #2a9d4a; }
+  .card-badge.st-published        { background: #1a6b35; color: #fff; font-size: 10px; }
+  .card-meter { margin-bottom: 7px; }
+  .card-bar-bg {
+    height: 4px; background: #ececec; border-radius: 2px; overflow: hidden; margin-bottom: 3px;
+  }
+  .card-bar-fill {
+    height: 100%; background: #2a9d4a; border-radius: 2px; transition: width .3s;
+  }
+  .card-bar-fill.over { background: #c0392b; }
+  .card-chars {
+    font-size: 10.5px; color: #aaa; font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+  .card-stamp {
+    font-size: 10px; font-weight: 700; color: #1a6b35; letter-spacing: 0.07em;
+    text-align: right; margin-bottom: 4px;
+  }
+  .card-preview {
+    font-size: 11.5px; color: #888; line-height: 1.55; min-height: 32px; margin-bottom: 9px;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    font-family: -apple-system, "Hiragino Mincho ProN", serif;
+  }
+  .card-preview.empty { color: #ccc; font-style: italic; font-family: -apple-system, sans-serif; }
+  .card-actions { display: flex; gap: 5px; }
+  .card-edit-btn {
+    flex: 1; height: 30px; border: 1.5px solid #c8c6c0; background: #fff; color: #555;
+    border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .12s;
+  }
+  .card-edit-btn:hover { background: #f6f4ee; border-color: #999; }
+  .card-pub-btn {
+    flex: 1; height: 30px; border: none; background: #2a9d4a; color: #fff;
+    border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .12s;
+  }
+  .card-pub-btn:hover { background: #228840; }
+  .card-pub-btn.is-published { background: #888; color: #eee; cursor: default; font-size: 11px; }
+
+  /* ---- Phase 3: editor zone ---- */
+  .media-editor-zone {
+    border: 2px solid #c0392b; border-radius: 10px; padding: 16px;
+    background: #fff; margin-bottom: 16px;
+  }
+  .editor-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .editor-title {
+    font-size: 14px; font-weight: 700; color: #1A1A1A; flex: 1; min-width: 80px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .editor-close-btn {
+    background: #f0eee8; border: none; color: #888; height: 30px; padding: 0 12px;
+    border-radius: 6px; font-size: 13px; cursor: pointer;
+    font-family: -apple-system, sans-serif; transition: background .12s;
+  }
+  .editor-close-btn:hover { background: #e6e4dd; color: #444; }
+  .editor-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 10px; gap: 8px; flex-wrap: wrap;
+  }
+  .editor-foot-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .editor-pub-btn {
+    height: 38px; padding: 0 16px; border: none; background: #2a9d4a; color: #fff;
+    border-radius: 19px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s;
+  }
+  .editor-pub-btn:hover { background: #228840; }
+
+  /* ---- Phase 3: warning banner ---- */
+  .p3-warning {
+    background: #fff8e1; border: 1px solid #f5c842; border-left: 4px solid #f0a500;
+    border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 14px;
+    font-size: 13px; color: #7a5a00; font-weight: 600;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; display: none;
+  }
+  .p3-warning.visible { display: block; }
+
+  /* ---- Phase 3: controls row (sort + bulk publish) ---- */
+  .p3-controls {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .sort-btn {
+    height: 32px; padding: 0 13px; border: 1.5px solid #d8d6d0; background: #fff; color: #777;
+    border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .12s;
+  }
+  .sort-btn:hover { background: #f6f4ee; }
+  .sort-btn.active { border-color: #2a9d4a; color: #2a9d4a; background: #f3f9f4; }
+  .bulk-publish-btn {
+    height: 32px; padding: 0 13px; border: none; background: #2a9d4a; color: #fff;
+    border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .12s;
+  }
+  .bulk-publish-btn:hover { background: #228840; }
+  .bulk-publish-btn:disabled { background: #ccc; cursor: default; }
+
+  /* published status additions */
+  .status-select.st-published { color: #1a6b35; border-color: #1a6b35; }
+
   /* ---- Phase 4: verifier ---- */
   .verify-list { list-style: none; margin: 0 0 24px; padding: 0; }
   .verify-item {
@@ -688,10 +898,29 @@
     /* Phase 3: stack action buttons full width, larger tap targets */
     .action-row { gap: 8px; }
     .action-row .convert-btn, .action-row .prompt-btn { flex: 1 0 100%; width: 100%; height: 48px; }
-    .media-tab { padding: 9px 11px; font-size: 12px; }
-    .media-output { font-size: 16px; min-height: 220px; } /* 16px avoids iOS zoom */
+    /* media-tabs: horizontal scroll on mobile (nowrap prevents wrapping) */
+    .media-tabs {
+      flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; padding-bottom: 2px;
+    }
+    .media-tabs::-webkit-scrollbar { display: none; }
+    .media-tab { flex: 0 0 auto; padding: 9px 11px; font-size: 12px; white-space: nowrap; }
+    .media-output { font-size: 16px; min-height: 200px; } /* 16px avoids iOS zoom */
     .copy-btn { height: 44px; padding: 0 18px; font-size: 14px; }
     .char-count { font-size: 12.5px; }
+    /* status select: 16px prevents iOS zoom; panel-foot stacks vertically */
+    .status-select { font-size: 16px; height: 40px; border-radius: 8px; flex: 1; }
+    .panel-foot { flex-wrap: wrap; gap: 8px; }
+    .panel-foot > div { display: flex; gap: 8px; width: 100%; }
+    .to-verifier-btn { height: 54px; font-size: 16px; border-radius: 12px; }
+    /* p3 summary grid: 2 columns on narrow screens */
+    .p3-summary-grid { grid-template-columns: 1fr 1fr; }
+    /* media-grid: 2-col on mobile, card actions stacked */
+    .media-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .card-edit-btn, .card-pub-btn { font-size: 11px; height: 28px; }
+    .editor-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .editor-header .status-select { width: 100%; }
+    .bulk-publish-btn, .sort-btn { font-size: 11.5px; }
 
     /* Phase 4: bigger checkboxes + tap area + 16px datetime */
     .verify-item { padding: 14px 14px; gap: 14px; }
@@ -720,6 +949,163 @@
     .dist-sched-input { width: 100%; font-size: 16px; padding: 9px 8px; }
     .dist-url-input { font-size: 16px; padding: 9px 9px; }
     .dist-ts { font-size: 13px; }
+  }
+  /* tablet (iPad portrait 768px): 2-col grid */
+  @media (max-width: 768px) and (min-width: 601px) {
+    .media-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  }
+  /* very narrow (< 360px): single column */
+  @media (max-width: 359px) {
+    .media-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Phase 1: トピック候補 (active UI) ---- */
+  .p1-keyword-area {
+    background: #f9f8f5; border: 1.5px solid #e8e6e0; border-radius: 10px;
+    padding: 18px; margin-bottom: 20px;
+  }
+  .p1-keyword-label {
+    display: block; font-size: 13px; font-weight: 700; color: #555; margin-bottom: 8px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p1-keywords {
+    width: 100%; min-height: 72px; font-size: 14px; border: 1.5px solid #d0cdc5;
+    border-radius: 7px; padding: 10px 12px; resize: vertical;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    background: #fff; color: #1a1a1a; line-height: 1.6;
+  }
+  .p1-keywords:focus { outline: none; border-color: #1a6b35; box-shadow: 0 0 0 2px rgba(26,107,53,0.12); }
+  .p1-generate-btn {
+    margin-top: 12px; background: #1a6b35; color: #fff; border: none;
+    border-radius: 7px; padding: 10px 22px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s;
+  }
+  .p1-generate-btn:hover { background: #155a2c; }
+  .p1-topic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .p1-topic-card {
+    border: 1.5px solid #e8e6e0; border-radius: 10px; padding: 16px;
+    background: #fff; display: flex; flex-direction: column; gap: 8px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .p1-topic-card:hover { border-color: #aaa; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+  .p1-topic-num {
+    font-size: 11px; font-weight: 700; color: #1a6b35; letter-spacing: 0.05em;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p1-topic-title {
+    font-size: 14.5px; font-weight: 700; color: #1a1a1a; line-height: 1.55;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p1-topic-meta {
+    font-size: 12px; color: #777; line-height: 1.6;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p1-topic-meta strong { color: #444; }
+  .p1-topic-ease { font-size: 12.5px; color: #c8860a; font-weight: 600; }
+  .p1-pick-btn {
+    margin-top: auto; background: #1a6b35; color: #fff; border: none; border-radius: 7px;
+    padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s; text-align: center;
+  }
+  .p1-pick-btn:hover { background: #155a2c; }
+  .p1-count-note {
+    font-size: 12px; color: #888; margin: 0 0 12px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+
+  /* ---- Phase 4: new check sections ---- */
+  .p4-section {
+    background: #fff; border: 1.5px solid #e8e6e0; border-radius: 10px;
+    padding: 18px; margin-bottom: 16px;
+  }
+  .p4-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; gap: 10px;
+  }
+  .p4-section-title {
+    font-size: 14px; font-weight: 700; color: #333;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p4-run-btn {
+    background: #555; color: #fff; border: none; border-radius: 6px;
+    padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s; white-space: nowrap;
+  }
+  .p4-run-btn:hover { background: #333; }
+  .p4-run-btn:disabled { background: #aaa; cursor: default; }
+  .p4-check-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid #f0eee8;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p4-check-item:last-of-type { border-bottom: none; }
+  .p4-check-icon { font-size: 16px; flex: none; margin-top: 1px; }
+  .p4-check-body { flex: 1; }
+  .p4-check-label { font-size: 13.5px; font-weight: 600; color: #1a1a1a; }
+  .p4-check-detail { font-size: 12px; color: #888; margin-top: 3px; line-height: 1.5; }
+  .p4-check-item.is-info .p4-check-label { color: #555; }
+  .p4-section-result {
+    margin-top: 14px; padding: 10px 14px; border-radius: 7px; font-size: 13px; font-weight: 700;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; text-align: center;
+  }
+  .p4-section-result.ok   { background: #f0faf2; color: #1e7a37; border: 1px solid #bfe2c6; }
+  .p4-section-result.warn { background: #fff8e1; color: #8a6200; border: 1px solid #f0c040; }
+  .p4-placeholder {
+    font-size: 13px; color: #aaa; text-align: center; padding: 18px 0; margin: 0;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p4-concerns-wrap { display: flex; flex-direction: column; gap: 16px; }
+  .p4-concern-source-label {
+    font-size: 11px; font-weight: 700; color: #888; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 8px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p4-concern-item {
+    background: #fff8e1; border: 1px solid #f0c040; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 8px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: opacity .2s, background .2s;
+  }
+  .p4-concern-item:last-child { margin-bottom: 0; }
+  .p4-concern-item.done { opacity: 0.55; background: #f3f9f4; border-color: #bfe2c6; }
+  .p4-concern-text { font-size: 13px; color: #6a5000; margin-bottom: 10px; line-height: 1.5; }
+  .p4-concern-done-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .p4-concern-done-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: #1a6b35; cursor: pointer; flex: none; }
+  .p4-concern-done-label { font-size: 13px; color: #555; cursor: pointer; }
+  .p4-concern-memo {
+    width: 100%; font-size: 13px; border: 1px solid #d0cdc5; border-radius: 6px;
+    padding: 7px 10px; resize: vertical; min-height: 54px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    background: #fff; color: #1a1a1a;
+  }
+  .p4-concern-memo:focus { outline: none; border-color: #1a6b35; }
+  .p4-no-concerns {
+    font-size: 13px; color: #1e7a37; font-weight: 600; padding: 10px 0;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p4-user-action { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .p4-back-btn {
+    flex: 1; background: #fff; color: #555; border: 1.5px solid #d0cdc5;
+    border-radius: 8px; padding: 12px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: border-color .15s, color .15s;
+  }
+  .p4-back-btn:hover { border-color: #888; color: #1a1a1a; }
+  .p4-complete-btn {
+    flex: 2; background: #1a6b35; color: #fff; border: none; border-radius: 8px;
+    padding: 12px 18px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s;
+  }
+  .p4-complete-btn:hover { background: #155a2c; }
+
+  @media (max-width: 600px) {
+    .p1-topic-grid { grid-template-columns: 1fr; }
+    .p4-user-action { flex-direction: column; }
+    .p4-back-btn, .p4-complete-btn { width: 100%; }
   }
 </style>
 </head>
@@ -754,23 +1140,19 @@
 <section id="phase-1" class="phase">
   <div class="phase-wrap">
     <h2 class="phase-title">① トピック候補</h2>
-    <p class="phase-sub">aico-weekly-topics スキルが生成する週次10本の記事案を表示し PICK するフェーズ。<strong>本タスクでは骨組み(将来差し替え用の差込口つき)。</strong></p>
-    <!-- 差込口: 将来 weekly_topics/<YYYY-WW>/topics.html のダイジェストを #phase1-topics-mount に流し込む。
-         統合時は JS の window.AIcoRenderTopics(htmlString) を呼ぶだけで一覧化できる構成。 -->
-    <div id="phase1-topics-mount">
-      <div class="skeleton-card">
-        <span class="skeleton-badge">骨組み / 将来差し替え</span>
-        <div>差込口 <code>#phase1-topics-mount</code> に <code>weekly_topics/<span id="p1-week">YYYY-WW</span>/topics.html</code> のダイジェストを流し込みます。</div>
-        <ul>
-          <li>analyst が web_search で収集した構造的6本柱 → 記事案10本</li>
-          <li>各案に Five Stars 紐付け / Sources URL / 媒体トラフィック</li>
-          <li>PICK ボタン → Phase 2(原稿執筆)へ遷移</li>
-        </ul>
-        <div style="margin-top:12px;">
-          <button type="button" class="prompt-btn" id="p1-load-hint" style="height:40px;">📂 topics.html の差し替え手順</button>
-        </div>
-      </div>
+    <p class="phase-sub">関心・テーマ条件を入力してトピック候補を生成します。候補から選んで Phase 2（原稿執筆）へ進めます。</p>
+    <div class="p1-keyword-area">
+      <label class="p1-keyword-label" for="p1-keywords">関心・テーマ条件（カンマ・読点区切り）</label>
+      <textarea id="p1-keywords" class="p1-keywords" rows="3"
+        placeholder="例：AI、テレビ局、YouTube、海外展開、個人ブランディング&#10;空欄の場合は標準テーマから10本を生成します。"></textarea>
+      <button type="button" id="p1-generate-btn" class="p1-generate-btn">📋 トピック候補を出す（10本）</button>
     </div>
+    <div id="p1-topic-area" style="display:none;">
+      <p class="p1-count-note" id="p1-count-note"></p>
+      <div id="p1-topic-grid" class="p1-topic-grid"></div>
+    </div>
+    <!-- 将来差込口: window.AIcoRenderTopics(htmlString) で外部から差し替え可能 -->
+    <div id="phase1-topics-mount" style="display:none;"></div>
   </div>
 </section>
 
@@ -918,11 +1300,23 @@
 
 </section><!-- /phase-2 -->
 
-<!-- ===== Phase 3: distributor 変換(本タスクの中心) ===== -->
+<!-- ===== Phase 3: distributor ダッシュボード(編集OS) ===== -->
 <section id="phase-3" class="phase">
   <div class="phase-wrap">
-    <h2 class="phase-title">③ distributor 変換</h2>
-    <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開(AIco言語ポリシー v1.6 準拠)。<br>※ v1.0 は変換ロジック未実装 — ボタンで各媒体の枠とガイドを生成し、城田が手動で貼り付け・編集します。実変換は別タスク(claude.ai の Claude に生成依頼)。</p>
+    <h2 class="phase-title">③ distributor ダッシュボード</h2>
+    <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開・比較・発信管理(編集OS)。変換は「⚡」ボタンで枠生成 → Claude に貼り付け依頼 → 各欄へペースト → 発信準備OK に進める。</p>
+
+    <div class="p3-warning" id="p3-warning"></div>
+
+    <div class="p3-progress-wrap" id="p3-progress-wrap">
+      <div class="p3-progress-label">
+        <span>媒体進捗</span>
+        <span id="p3-progress-text"><strong>0 / 6 発信準備OK</strong>　0 / 6 発信済み</span>
+      </div>
+      <div class="p3-progress-bar-bg">
+        <div class="p3-progress-bar-fill" id="p3-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
 
     <div class="source-box" id="dist-source">
       <span class="src-label">入力(note 正本 / Phase 2 v2 本文)</span>
@@ -934,18 +1328,78 @@
       <button type="button" class="prompt-btn" id="dist-prompt-btn">📋 Claudeに変換依頼プロンプトをコピー</button>
     </div>
 
-    <div class="media-tabs" id="media-tabs"></div>
-    <div id="media-panels"></div>
+    <div class="p3-controls">
+      <button type="button" class="sort-btn" id="sort-status-btn">↕ ステータス順</button>
+      <button type="button" class="bulk-publish-btn" id="bulk-publish-btn" disabled>📤 一括発信済みにする</button>
+    </div>
+
+    <div id="media-grid" class="media-grid"></div>
+    <div id="media-editor-zone" class="media-editor-zone" style="display:none;"></div>
+    <button type="button" class="to-verifier-btn" id="to-verifier-btn">✅ Phase 4 verifierへ渡す →</button>
   </div>
 </section>
 
-<!-- ===== Phase 4: verifier 8項目チェック ===== -->
+<!-- ===== Phase 4: verifier チェック ===== -->
 <section id="phase-4" class="phase">
   <div class="phase-wrap">
-    <h2 class="phase-title">④ verifier 8項目チェック</h2>
-    <p class="phase-sub">配信前ゲート。8項目すべてにチェックが入ると「配信準備完了」ステータスに変わります。</p>
-    <ul class="verify-list" id="verify-list"></ul>
-    <div class="verify-status" id="verify-status">未完了 <span class="vs-count">0 / 8 項目</span></div>
+    <h2 class="phase-title">④ verifier チェック</h2>
+    <p class="phase-sub">配信前ゲート。システムチェック・AI verifier チェック・手動チェックリストを通過したら Phase 5 へ進みます。</p>
+
+    <!-- Phase 3 ステータス要約 (既存) -->
+    <div class="p3-summary" id="p3-summary">
+      <div class="p3-summary-title">③ 媒体ステータス（Phase 3 より）</div>
+      <div class="p3-summary-grid" id="p3-summary-grid"></div>
+    </div>
+
+    <!-- システムチェック -->
+    <div class="p4-section" id="p4-sys-section">
+      <div class="p4-section-header">
+        <span class="p4-section-title">システムチェック</span>
+        <button type="button" class="p4-run-btn" id="p4-run-sys-btn">▶ 実行</button>
+      </div>
+      <div id="p4-sys-results"><p class="p4-placeholder">「▶ 実行」でチェックを開始します。</p></div>
+    </div>
+
+    <!-- AI verifier チェック -->
+    <div class="p4-section" id="p4-ai-section">
+      <div class="p4-section-header">
+        <span class="p4-section-title">AI verifier チェック <small style="font-weight:400;color:#aaa;font-size:11px;">（仮チェック / 将来API連携）</small></span>
+        <button type="button" class="p4-run-btn" id="p4-run-ai-btn">▶ 実行</button>
+      </div>
+      <div id="p4-ai-results"><p class="p4-placeholder">「▶ 実行」でチェックを開始します。</p></div>
+    </div>
+
+    <!-- 留保・懸念点 -->
+    <div class="p4-section" id="p4-concerns-section" style="display:none;">
+      <div class="p4-section-header">
+        <span class="p4-section-title">留保・懸念点</span>
+      </div>
+      <div class="p4-concerns-wrap">
+        <div>
+          <div class="p4-concern-source-label">システムチェック由来</div>
+          <div id="p4-sys-concerns"></div>
+        </div>
+        <div>
+          <div class="p4-concern-source-label">AI verifier 由来</div>
+          <div id="p4-ai-concerns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 手動チェックリスト (既存8項目) -->
+    <div class="p4-section">
+      <div class="p4-section-header">
+        <span class="p4-section-title">手動チェックリスト</span>
+      </div>
+      <ul class="verify-list" id="verify-list"></ul>
+      <div class="verify-status" id="verify-status">未完了 <span class="vs-count">0 / 8 項目</span></div>
+    </div>
+
+    <!-- ユーザー対応ボタン -->
+    <div class="p4-user-action">
+      <button type="button" class="p4-back-btn" id="p4-back-btn">← Phase 3 へ戻って修正</button>
+      <button type="button" class="p4-complete-btn" id="p4-complete-btn">✅ 検証完了として Phase 5 へ進む</button>
+    </div>
   </div>
 </section>
 
@@ -1000,8 +1454,10 @@
   function lsKey(name){ return 'aico_' + name + '_' + ARTICLE_KEY; }
   const LS_KEY = lsKey('voice_memo');      // = aico_voice_memo_W21_3(既存データ互換)
   const EDIT_KEY = lsKey('edited_body');   // = aico_edited_body_W21_3(既存データ互換)
-  const DIST_KEY = lsKey('dist_outputs');  // Phase3: 6媒体出力
-  const VERIFY_KEY = lsKey('verify_state');// Phase4: 8項目チェック
+  const DIST_KEY = lsKey('dist_outputs');           // Phase3: 6媒体出力
+  const DIST_STATUS_KEY = lsKey('dist_status');    // Phase3: 各媒体ステータス
+  const DIST_PUB_TIME_KEY = lsKey('dist_pub_time');// Phase3: 発信記録タイムスタンプ
+  const VERIFY_KEY = lsKey('verify_state');         // Phase4: 8項目チェック
   const PHASE_KEY = lsKey('active_phase'); // アクティブフェーズ
   const DIST_STATE_KEY = lsKey('dist_state'); // Phase5: 配信状態(状態/URL/更新時刻)
 
@@ -1333,12 +1789,60 @@
 
   // ---- 6媒体仕様(AIco言語ポリシー v1.6 + distributor 仕様) ----
   const MEDIA = [
-    { id:'note_jp',            label:'note (JP本館)',      limit:5000, hint:'日本語・長文 2000〜5000字。タイトル+冒頭3行+見出し3〜5段+締めの問い。これが正本。' },
-    { id:'substack_en',        label:'Substack (EN本館)',  limit:6000, hint:'英語・並列生成(翻訳ではない)。note と 70%共通 + 30%英語圏独自。' },
-    { id:'medium_en',          label:'Medium (EN拡張)',    limit:3000, hint:'英語・Substack の 40-50%圧縮版。SEO発見窓口。1週間後配信。' },
-    { id:'linkedin_en',        label:'LinkedIn (ENハブ)',  limit:1500, hint:'英語・1200〜1500字。冒頭2行で結論先出し。末尾にリンク + ハッシュタグ3〜5。' },
-    { id:'x_thread',           label:'X スレッド (70:30)', limit:1000, hint:'5〜7投稿・各140字以内。1投稿目で結論、最終で note リンク。' },
-    { id:'instagram_carousel', label:'Instagram (70:30)',  limit:2200, hint:'カルーセル10枚以内。1枚目フック / 2-9本論 / 10枚目 note誘導。キャプション200〜400字 + ハッシュタグ5〜10。' }
+    {
+      id:'note_jp', label:'note', tabLabel:'note',
+      limit:5000, limitMin:2000,
+      purpose:'日本語・長文。正本。',
+      length:'2000〜5000字（上限 5000字）',
+      caution:'タイトル + 冒頭3行 + 見出し3〜5段 + 締めの問い。',
+      hint:'日本語・長文 2000〜5000字。タイトル+冒頭3行+見出し3〜5段+締めの問い。これが正本。',
+      apiEndpoint: null, publishedUrl: null
+    },
+    {
+      id:'substack_medium', label:'Substack / Medium', tabLabel:'Sub/Med',
+      limit:6000, limitMin:2000,
+      purpose:'英語・並列生成（翻訳ではない）。Substackが本館、Mediumが圧縮版。',
+      length:'Substack: 2000〜6000字 / Medium: Substack の40〜50%（上限 6000字）',
+      caution:'note と 70%共通 + 30%英語圏独自。Medium は1週間後配信・SEO窓口。',
+      hint:'英語・並列生成(翻訳ではない)。note と 70%共通 + 30%英語圏独自。Mediumは圧縮版。',
+      apiEndpoint: null, publishedUrl: null
+    },
+    {
+      id:'linkedin_en', label:'LinkedIn', tabLabel:'LinkedIn',
+      limit:1500, limitMin:1200,
+      purpose:'英語・ENハブ。ビジネス層への接点。',
+      length:'1200〜1500字（上限 1500字）',
+      caution:'冒頭2行で結論先出し。末尾にリンク + ハッシュタグ3〜5。',
+      hint:'英語・1200〜1500字。冒頭2行で結論先出し。末尾にリンク + ハッシュタグ3〜5。',
+      apiEndpoint: null, publishedUrl: null
+    },
+    {
+      id:'x_thread', label:'X スレッド', tabLabel:'X',
+      limit:1000, limitMin:0,
+      purpose:'70:30ルール適用。速報・議論拡散。',
+      length:'5〜7投稿・各140字以内（総計 上限 1000字目安）',
+      caution:'1投稿目で結論、最終投稿で note リンク。',
+      hint:'5〜7投稿・各140字以内。1投稿目で結論、最終で note リンク。',
+      apiEndpoint: null, publishedUrl: null
+    },
+    {
+      id:'instagram_carousel', label:'Instagram', tabLabel:'IG',
+      limit:2200, limitMin:200,
+      purpose:'70:30ルール適用。カルーセル形式・視覚訴求。',
+      length:'キャプション200〜400字 + ハッシュタグ5〜10（上限 2200字）',
+      caution:'1枚目フック / 2-9枚本論 / 10枚目 note誘導。カルーセル10枚以内。',
+      hint:'カルーセル10枚以内。1枚目フック / 2-9本論 / 10枚目 note誘導。キャプション200〜400字 + ハッシュタグ5〜10。',
+      apiEndpoint: null, publishedUrl: null
+    },
+    {
+      id:'youtube_desc', label:'YouTube概要欄', tabLabel:'YouTube',
+      limit:5000, limitMin:100,
+      purpose:'YouTube概要欄 または Shorts説明文。発見と文脈補完。',
+      length:'概要欄: 200〜2000字 / Shorts説明文: 100〜500字（上限 5000字）',
+      caution:'冒頭3行が検索・サムネ表示に直結。リンク・タイムスタンプを末尾に。',
+      hint:'YouTube概要欄(200〜2000字)またはShorts説明文(100〜500字)。冒頭3行が表示される。リンク・タイムスタンプを末尾に。',
+      apiEndpoint: null, publishedUrl: null
+    }
   ];
 
   // ---- Phase switching ----
@@ -1385,117 +1889,403 @@
     b.addEventListener('click', function(){ setPhase(b.dataset.phase); });
   });
 
-  // ---- Phase 3: distributor 変換 ----
-  const mediaTabsEl = document.getElementById('media-tabs');
-  const mediaPanelsEl = document.getElementById('media-panels');
+  // ---- Phase 3: distributor ダッシュボード ----
+  var STATUS_LABELS = {
+    empty:'空', draft:'下書き', reviewing:'確認中',
+    waiting_verifier:'verifier待ち', ready:'発信準備OK', published:'発信済み'
+  };
+  // sort priority (low = higher priority in sorted view)
+  var STATUS_SORT = { published:0, ready:1, reviewing:2, waiting_verifier:3, draft:4, empty:5 };
+  var distData = {};       // { mediaId: { text, status, pubTime } }
+  var currentEditorMedia = null;
+  var sortByStatus = false;
 
-  MEDIA.forEach(function(m, idx){
-    const tab = document.createElement('button');
-    tab.type = 'button';
-    tab.className = 'media-tab' + (idx === 0 ? ' active' : '');
-    tab.dataset.media = m.id;
-    tab.innerHTML = m.label + '<span class="filled-dot"></span>';
-    mediaTabsEl.appendChild(tab);
-
-    const panel = document.createElement('div');
-    panel.className = 'media-panel' + (idx === 0 ? ' active' : '');
-    panel.dataset.media = m.id;
-    panel.innerHTML =
-      '<div class="panel-hint">' + m.hint + '</div>' +
-      '<textarea class="media-output" id="out-' + m.id + '" placeholder="ここに「' + m.label + '」向けの変換結果が入ります。&#10;「⚡ 6媒体に変換」でガイド枠を生成 → 手で貼り付け・編集 → 📄コピー。"></textarea>' +
-      '<div class="panel-foot"><span class="char-count" id="cc-' + m.id + '">0 字 / 上限 ' + m.limit + '</span>' +
-      '<button type="button" class="copy-btn" data-copy="' + m.id + '">📄 コピー</button></div>';
-    mediaPanelsEl.appendChild(panel);
-  });
-
-  const mediaTabs = Array.prototype.slice.call(mediaTabsEl.querySelectorAll('.media-tab'));
-  const mediaPanels = Array.prototype.slice.call(mediaPanelsEl.querySelectorAll('.media-panel'));
-  mediaTabs.forEach(function(t){
-    t.addEventListener('click', function(){
-      mediaTabs.forEach(function(x){ x.classList.remove('active'); });
-      mediaPanels.forEach(function(x){ x.classList.remove('active'); });
-      t.classList.add('active');
-      const p = mediaPanelsEl.querySelector('.media-panel[data-media="' + t.dataset.media + '"]');
-      if (p) p.classList.add('active');
+  // ---- data load / save ----
+  function loadDistData() {
+    var texts = {}, statuses = {}, pubTimes = {};
+    try { texts = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e) {}
+    try { statuses = JSON.parse(localStorage.getItem(DIST_STATUS_KEY) || '{}'); } catch(e) {}
+    try { pubTimes = JSON.parse(localStorage.getItem(DIST_PUB_TIME_KEY) || '{}'); } catch(e) {}
+    // migrate old keys: substack_en + medium_en → substack_medium
+    if (!texts['substack_medium'] && (texts['substack_en'] || texts['medium_en'])) {
+      texts['substack_medium'] = (texts['substack_en'] || '') +
+        (texts['medium_en'] ? '\n\n--- Medium ---\n' + texts['medium_en'] : '');
+    }
+    MEDIA.forEach(function(m) {
+      distData[m.id] = {
+        text: texts[m.id] || '',
+        status: statuses[m.id] || 'draft',
+        pubTime: pubTimes[m.id] || null
+      };
     });
-  });
-
-  function updateCharCount(m){
-    const ta = document.getElementById('out-' + m.id);
-    const cc = document.getElementById('cc-' + m.id);
-    const tab = mediaTabsEl.querySelector('.media-tab[data-media="' + m.id + '"]');
-    if (!ta || !cc) return;
-    const n = ta.value.length;
-    cc.textContent = n + ' 字 / 上限 ' + m.limit;
-    cc.classList.toggle('over', n > m.limit);
-    if (tab) tab.classList.toggle('filled', n > 0);
   }
-  function saveDistOutputs(){
-    const data = {};
-    MEDIA.forEach(function(m){
-      const ta = document.getElementById('out-' + m.id);
-      if (ta) data[m.id] = ta.value;
+  function saveDistData() {
+    var texts = {}, statuses = {}, pubTimes = {};
+    MEDIA.forEach(function(m) {
+      var d = distData[m.id];
+      texts[m.id] = d.text;
+      statuses[m.id] = d.status;
+      if (d.pubTime) pubTimes[m.id] = d.pubTime;
     });
-    try { localStorage.setItem(DIST_KEY, JSON.stringify(data)); } catch(e){}
+    try { localStorage.setItem(DIST_KEY, JSON.stringify(texts)); } catch(e) {}
+    try { localStorage.setItem(DIST_STATUS_KEY, JSON.stringify(statuses)); } catch(e) {}
+    try { localStorage.setItem(DIST_PUB_TIME_KEY, JSON.stringify(pubTimes)); } catch(e) {}
   }
-  (function restoreDist(){
-    let data = {};
-    try { data = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e){ data = {}; }
-    MEDIA.forEach(function(m){
-      const ta = document.getElementById('out-' + m.id);
-      if (!ta) return;
-      if (data[m.id]) ta.value = data[m.id];
-      ta.addEventListener('input', function(){ updateCharCount(m); saveDistOutputs(); });
-      updateCharCount(m);
+  // compat shims (existing code may call these)
+  function saveDistOutputs() { saveDistData(); }
+  function saveDistStatus()  { saveDistData(); }
+
+  // ---- card grid ----
+  function getMediaById(id) {
+    for (var i = 0; i < MEDIA.length; i++) { if (MEDIA[i].id === id) return MEDIA[i]; }
+    return null;
+  }
+  function getCardStatus(mediaId) {
+    var d = distData[mediaId];
+    return (!d || !d.text.trim()) ? 'empty' : d.status;
+  }
+  function buildMediaGrid() {
+    var gridEl = document.getElementById('media-grid');
+    if (!gridEl) return;
+    gridEl.innerHTML = '';
+    MEDIA.forEach(function(m) {
+      var card = document.createElement('div');
+      card.id = 'card-' + m.id;
+      card.dataset.media = m.id;
+      gridEl.appendChild(card);
     });
-  })();
+    MEDIA.forEach(function(m) { updateCard(m.id); });
+    // event delegation — one listener for the whole grid
+    gridEl.addEventListener('click', function(e) {
+      var editBtn = e.target.closest('.card-edit-btn');
+      var pubBtn  = e.target.closest('.card-pub-btn');
+      if (editBtn) { openEditor(editBtn.dataset.media); return; }
+      if (pubBtn && !pubBtn.classList.contains('is-published')) {
+        publishMedia(pubBtn.dataset.media);
+      }
+    });
+  }
+  function updateCard(mediaId) {
+    var card = document.getElementById('card-' + mediaId);
+    if (!card) return;
+    var m = getMediaById(mediaId);
+    if (!m) return;
+    var d = distData[mediaId];
+    var isEmpty = !d.text.trim();
+    var charLen = d.text.length;
+    var barPct  = m.limit > 0 ? Math.min(100, Math.round(charLen / m.limit * 100)) : 0;
+    var isOver  = charLen > m.limit;
+    var st      = isEmpty ? 'empty' : d.status;
+    var preview = isEmpty ? '(まだ空)' : d.text.replace(/\s+/g, ' ').slice(0, 60);
+    var isSelected = currentEditorMedia === mediaId;
+    card.className = 'media-card' +
+      (d.status === 'published' ? ' st-published' : '') +
+      (isSelected ? ' selected' : '');
+    card.innerHTML =
+      '<div class="card-header">' +
+        '<span class="card-name">' + (m.tabLabel || m.label) + '</span>' +
+        '<span class="card-badge st-' + st + '">' + (STATUS_LABELS[st] || st) + '</span>' +
+      '</div>' +
+      (d.status === 'published' ? '<div class="card-stamp">★ 発信済み</div>' : '') +
+      '<div class="card-meter">' +
+        '<div class="card-bar-bg"><div class="card-bar-fill' + (isOver ? ' over' : '') +
+          '" style="width:' + barPct + '%"></div></div>' +
+        '<span class="card-chars">' + charLen + ' / ' + m.limit + '字</span>' +
+      '</div>' +
+      '<div class="card-preview' + (isEmpty ? ' empty' : '') + '">' +
+        preview + (!isEmpty && d.text.length > 60 ? '…' : '') +
+      '</div>' +
+      '<div class="card-actions">' +
+        '<button type="button" class="card-edit-btn" data-media="' + mediaId + '">✏️ 編集</button>' +
+        '<button type="button" class="card-pub-btn' + (d.status === 'published' ? ' is-published' : '') +
+          '" data-media="' + mediaId + '">' +
+          (d.status === 'published' ? '★ 発信済み' : '📤 発信済みにする') +
+        '</button>' +
+      '</div>';
+  }
+  function sortGrid() {
+    var gridEl = document.getElementById('media-grid');
+    if (!gridEl) return;
+    if (sortByStatus) {
+      var cards = Array.prototype.slice.call(gridEl.children);
+      cards.sort(function(a, b) {
+        return (STATUS_SORT[getCardStatus(a.dataset.media)] || 5) -
+               (STATUS_SORT[getCardStatus(b.dataset.media)] || 5);
+      });
+      cards.forEach(function(c) { gridEl.appendChild(c); });
+    } else {
+      MEDIA.forEach(function(m) {
+        var c = document.getElementById('card-' + m.id);
+        if (c) gridEl.appendChild(c);
+      });
+    }
+  }
+
+  // ---- progress + warning ----
+  function updateProgress() {
+    var readyCount = 0, pubCount = 0;
+    MEDIA.forEach(function(m) {
+      var st = distData[m.id].status;
+      if (st === 'ready') readyCount++;
+      if (st === 'published') pubCount++;
+    });
+    var total = MEDIA.length;
+    var pct = Math.round((readyCount + pubCount) / total * 100);
+    var fillEl = document.getElementById('p3-progress-fill');
+    var textEl = document.getElementById('p3-progress-text');
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (textEl) textEl.innerHTML =
+      '<strong>' + readyCount + ' / ' + total + ' 発信準備OK</strong>　' +
+      pubCount + ' / ' + total + ' 発信済み';
+    updateBulkBtn();
+    refreshP4Summary();
+  }
+  function updateWarning() {
+    var count = 0;
+    MEDIA.forEach(function(m) {
+      var d = distData[m.id];
+      var isEmpty   = !d.text.trim();
+      var tooShort  = !isEmpty && m.limitMin > 0 && d.text.length < m.limitMin;
+      var notReady  = d.status !== 'ready' && d.status !== 'published';
+      if (isEmpty || tooShort || notReady) count++;
+    });
+    var el = document.getElementById('p3-warning');
+    if (!el) return;
+    if (count > 0) {
+      el.textContent = '⚠ 未完成媒体あり（' + count + ' / ' + MEDIA.length +
+        '） — 空・文字数不足・準備未完の媒体が残っています';
+      el.classList.add('visible');
+    } else {
+      el.classList.remove('visible');
+    }
+  }
+  function updateBulkBtn() {
+    var btn = document.getElementById('bulk-publish-btn');
+    if (!btn) return;
+    var readyCount = MEDIA.filter(function(m) {
+      return distData[m.id].status === 'ready';
+    }).length;
+    btn.disabled = readyCount === 0;
+  }
+
+  // ---- editor zone ----
+  function openEditor(mediaId) {
+    var zoneEl = document.getElementById('media-editor-zone');
+    if (!zoneEl) return;
+    var m = getMediaById(mediaId);
+    if (!m) return;
+    var d = distData[mediaId];
+    currentEditorMedia = mediaId;
+    MEDIA.forEach(function(mx) { updateCard(mx.id); }); // refresh selected state
+
+    var stOpts = [
+      ['draft','下書き'], ['reviewing','確認中'],
+      ['waiting_verifier','verifier待ち'], ['ready','発信準備OK'], ['published','発信済み']
+    ].map(function(o) {
+      return '<option value="' + o[0] + '"' + (d.status === o[0] ? ' selected' : '') +
+        '>' + o[1] + '</option>';
+    }).join('');
+
+    zoneEl.innerHTML =
+      '<div class="editor-header">' +
+        '<span class="editor-title">' + m.label + '（編集中）</span>' +
+        '<select class="status-select st-' + d.status + '" id="editor-status-select">' +
+          stOpts + '</select>' +
+        '<button type="button" class="editor-close-btn" id="editor-close-btn">× 閉じる</button>' +
+      '</div>' +
+      '<div class="panel-spec">' +
+        '<div class="panel-spec-row"><span class="panel-spec-key">用途</span><span class="panel-spec-val">' + m.purpose + '</span></div>' +
+        '<div class="panel-spec-row"><span class="panel-spec-key">目安</span><span class="panel-spec-val">' + m.length + '</span></div>' +
+        '<div class="panel-spec-row"><span class="panel-spec-key">注意</span><span class="panel-spec-val">' + m.caution + '</span></div>' +
+      '</div>' +
+      '<textarea class="media-output" id="editor-textarea"' +
+        ' placeholder="ここに「' + m.label + '」向けの変換結果が入ります。"></textarea>' +
+      '<div class="editor-foot">' +
+        '<span class="char-count" id="editor-cc">0 字 / 上限 ' + m.limit + '</span>' +
+        '<div class="editor-foot-right">' +
+          '<button type="button" class="copy-btn" id="editor-copy-btn">📄 コピー</button>' +
+          '<button type="button" class="editor-pub-btn" id="editor-pub-btn">' +
+            (d.status === 'published' ? '★ 発信済み' : '📤 発信済みにする') +
+          '</button>' +
+        '</div>' +
+      '</div>';
+
+    var ta  = document.getElementById('editor-textarea');
+    var cc  = document.getElementById('editor-cc');
+    var sel = document.getElementById('editor-status-select');
+    ta.value = d.text;
+    cc.textContent = d.text.length + ' 字 / 上限 ' + m.limit;
+    cc.classList.toggle('over', d.text.length > m.limit);
+
+    ta.addEventListener('input', function() {
+      distData[mediaId].text = ta.value;
+      cc.textContent = ta.value.length + ' 字 / 上限 ' + m.limit;
+      cc.classList.toggle('over', ta.value.length > m.limit);
+      updateCard(mediaId);
+      updateProgress();
+      updateWarning();
+      saveDistData();
+    });
+    sel.addEventListener('change', function() {
+      distData[mediaId].status = sel.value;
+      sel.className = 'status-select st-' + sel.value;
+      var pb = document.getElementById('editor-pub-btn');
+      if (pb) pb.textContent = sel.value === 'published' ? '★ 発信済み' : '📤 発信済みにする';
+      updateCard(mediaId);
+      updateProgress();
+      updateWarning();
+      if (sortByStatus) sortGrid();
+      saveDistData();
+    });
+    document.getElementById('editor-close-btn').addEventListener('click', closeEditor);
+    document.getElementById('editor-copy-btn').addEventListener('click', async function() {
+      if (!ta.value.trim()) { showToast('この媒体はまだ空です。', 'warn', 2000); return; }
+      try {
+        await navigator.clipboard.writeText(ta.value);
+        showToast('📄 コピーしました(' + mediaId + ')', null, 1800);
+      } catch(err) {
+        console.log(ta.value);
+        showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000);
+      }
+    });
+    document.getElementById('editor-pub-btn').addEventListener('click', function() {
+      publishMedia(mediaId);
+    });
+
+    zoneEl.style.display = '';
+    zoneEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function closeEditor() {
+    var zoneEl = document.getElementById('media-editor-zone');
+    if (zoneEl) zoneEl.style.display = 'none';
+    currentEditorMedia = null;
+    MEDIA.forEach(function(m) { updateCard(m.id); });
+  }
+
+  // ---- publish ----
+  function publishMedia(mediaId) {
+    var m = getMediaById(mediaId);
+    var name = m ? (m.tabLabel || m.label) : mediaId;
+    if (!confirm('「' + name + '」を発信済みにしますか？\n' +
+        '※ ステータスを記録するのみです（実際の投稿は手動で行ってください）。')) return;
+    distData[mediaId].status = 'published';
+    distData[mediaId].pubTime = new Date().toISOString();
+    saveDistData();
+    updateCard(mediaId);
+    updateProgress();
+    updateWarning();
+    if (sortByStatus) sortGrid();
+    refreshP4Summary();
+    showToast('★ ' + name + ' を発信済みにしました。', null, 2200);
+    if (currentEditorMedia === mediaId) {
+      var sel = document.getElementById('editor-status-select');
+      if (sel) { sel.value = 'published'; sel.className = 'status-select st-published'; }
+      var pb = document.getElementById('editor-pub-btn');
+      if (pb) pb.textContent = '★ 発信済み';
+    }
+  }
+  function bulkPublish() {
+    var readyList = MEDIA.filter(function(m) { return distData[m.id].status === 'ready'; });
+    if (!readyList.length) { showToast('「発信準備OK」の媒体がありません。', 'warn', 2500); return; }
+    var names = readyList.map(function(m) { return m.tabLabel || m.label; }).join('、');
+    if (!confirm('「発信準備OK」の ' + readyList.length + ' 媒体を一括で「発信済み」にします。\n(' + names + ')\n' +
+        '※ ステータスを記録するのみです（実際の投稿は手動で行ってください）。')) return;
+    var now = new Date().toISOString();
+    readyList.forEach(function(m) {
+      distData[m.id].status = 'published';
+      distData[m.id].pubTime = now;
+      updateCard(m.id);
+    });
+    saveDistData();
+    updateProgress();
+    updateWarning();
+    if (sortByStatus) sortGrid();
+    refreshP4Summary();
+    showToast('★ ' + readyList.length + ' 媒体を発信済みにしました。', null, 2200);
+  }
+
+  // ---- Phase 4 summary (updated to use distData) ----
+  function refreshP4Summary() {
+    var grid = document.getElementById('p3-summary-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    MEDIA.forEach(function(m) {
+      var d = distData[m.id];
+      var val = (!d || !d.text.trim()) ? 'empty' : d.status;
+      var item = document.createElement('div');
+      item.className = 'p3-summary-item';
+      item.innerHTML = '<span class="p3-summary-dot st-' + val + '"></span>' +
+        '<span>' + (m.tabLabel || m.label) + ': ' + (STATUS_LABELS[val] || val) + '</span>';
+      grid.appendChild(item);
+    });
+  }
+
+  // ---- init ----
+  loadDistData();
+  buildMediaGrid();
+  updateProgress();
+  updateWarning();
   refreshDistSource();
 
-  document.getElementById('convert-btn').addEventListener('click', function(){
-    const src = getSourceNote();
-    const title = getSourceTitle();
-    if (!src){ showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
-    const filled = MEDIA.filter(function(m){ const ta = document.getElementById('out-' + m.id); return ta && ta.value.trim(); });
+  // ---- event handlers ----
+  document.getElementById('convert-btn').addEventListener('click', function() {
+    var src = getSourceNote();
+    var title = getSourceTitle();
+    if (!src) { showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
+    var filled = MEDIA.filter(function(m) { return distData[m.id].text.trim(); });
     if (filled.length && !confirm('既存の変換結果(' + filled.length + '媒体)を上書きしてプレースホルダを再生成します。よろしいですか?')) return;
-    MEDIA.forEach(function(m){
-      const ta = document.getElementById('out-' + m.id);
-      if (!ta) return;
-      ta.value =
+    MEDIA.forEach(function(m) {
+      distData[m.id].text =
         '【' + m.label + ' 向け変換結果プレースホルダ】\n' +
         '— ' + m.hint + '\n' +
         '— 上限の目安: ' + m.limit + '字\n\n' +
         (m.id === 'note_jp'
           ? ('[タイトル] ' + title + '\n\n' + src)
           : 'ここに「' + m.label + '」向けの変換結果を貼り付け/編集してください。\n(自動変換は別タスク: 📋ボタンで Claude 用プロンプトを取得 → claude.ai で生成)');
-      updateCharCount(m);
     });
-    saveDistOutputs();
+    saveDistData();
+    MEDIA.forEach(function(m) { updateCard(m.id); });
+    updateProgress();
+    updateWarning();
+    if (sortByStatus) sortGrid();
     showToast('⚡ 6媒体の枠を生成しました(note_jp は正本を投入済)。', null, 2600);
   });
 
-  mediaPanelsEl.addEventListener('click', async function(e){
-    const btn = e.target.closest('.copy-btn');
-    if (!btn) return;
-    const id = btn.dataset.copy;
-    const ta = document.getElementById('out-' + id);
-    if (!ta || !ta.value.trim()){ showToast('この媒体はまだ空です。', 'warn', 2000); return; }
-    try { await navigator.clipboard.writeText(ta.value); showToast('📄 コピーしました(' + id + ')', null, 1800); }
-    catch(err){ console.log(ta.value); showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000); }
+  document.getElementById('dist-prompt-btn').addEventListener('click', async function() {
+    var src = getSourceNote();
+    var title = getSourceTitle();
+    if (!src) { showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
+    var p = 'distributor フェーズ1(変換)を実行してほしい。note 正本を 6媒体へ展開する。\n\n';
+    p += '【AIco言語ポリシー v1.6 準拠】note JP本館 / Substack+Medium EN / LinkedIn ENハブ / X 70:30 / Instagram 70:30 / YouTube概要欄。note と Substack は並列生成(翻訳ではない)、70%共通 + 30%市場別独自。\n\n';
+    p += '【媒体別仕様】\n';
+    MEDIA.forEach(function(m) { p += '- ' + m.label + '(id:' + m.id + ', 上限目安' + m.limit + '字): ' + m.hint + '\n'; });
+    p += '\n【入力 note 正本】\n[タイトル] ' + title + '\n\n' + src + '\n\n';
+    p += '【出力】6媒体それぞれの本文を、媒体id(' + MEDIA.map(function(m) { return m.id; }).join(' / ') + ')を見出しにして返してほしい。AI言語率≦30% / ブランド guardrails(本名露出なし)厳守。\n';
+    try { await navigator.clipboard.writeText(p); showToast('📋 変換依頼プロンプトをコピー\nclaude.ai に貼り付けて生成 → 結果を各媒体欄へ。', null, 2800); }
+    catch(err) { console.log(p); showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000); }
   });
 
-  document.getElementById('dist-prompt-btn').addEventListener('click', async function(){
-    const src = getSourceNote();
-    const title = getSourceTitle();
-    if (!src){ showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
-    let p = 'distributor フェーズ1(変換)を実行してほしい。note 正本を 6媒体へ展開する。\n\n';
-    p += '【AIco言語ポリシー v1.6 準拠】note JP本館 / Substack EN本館 / Medium EN拡張 / LinkedIn ENハブ / X 70:30 / Instagram 70:30。note と Substack は並列生成(翻訳ではない)、70%共通 + 30%市場別独自。\n\n';
-    p += '【媒体別仕様】\n';
-    MEDIA.forEach(function(m){ p += '- ' + m.label + '(id:' + m.id + ', 上限目安' + m.limit + '字): ' + m.hint + '\n'; });
-    p += '\n【入力 note 正本】\n[タイトル] ' + title + '\n\n' + src + '\n\n';
-    p += '【出力】6媒体それぞれの本文を、媒体id(note_jp / substack_en / medium_en / linkedin_en / x_thread / instagram_carousel)を見出しにして返してほしい。AI言語率≦30% / ブランド guardrails(本名露出なし)厳守。\n';
-    try { await navigator.clipboard.writeText(p); showToast('📋 変換依頼プロンプトをコピー\nclaude.ai に貼り付けて生成 → 結果を各媒体欄へ。', null, 2800); }
-    catch(err){ console.log(p); showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000); }
+  document.getElementById('to-verifier-btn').addEventListener('click', function() {
+    var notReady = MEDIA.filter(function(m) {
+      var st = distData[m.id].status;
+      return st !== 'ready' && st !== 'published';
+    });
+    if (notReady.length > 0) {
+      var names = notReady.map(function(m) { return m.tabLabel || m.label; }).join('、');
+      if (!confirm(notReady.length + '媒体がまだ「発信準備OK」「発信済み」ではありません。\n(' + names + ')\n\nこのまま Phase 4 verifier へ進みますか？')) return;
+    }
+    refreshP4Summary();
+    setPhase('4');
+    showToast('④ verifier チェックへ移動しました。', null, 1800);
   });
+
+  document.getElementById('sort-status-btn').addEventListener('click', function() {
+    sortByStatus = !sortByStatus;
+    this.classList.toggle('active', sortByStatus);
+    sortGrid();
+  });
+
+  document.getElementById('bulk-publish-btn').addEventListener('click', bulkPublish);
 
   // ---- Phase 4: verifier 8項目 ----
   const VERIFY_ITEMS = [
@@ -1561,6 +2351,210 @@
   });
   refreshVerifyStatus();
 
+  // ---- Phase 4: システムチェック + AI verifier チェック (新規) ----
+  var P4_CONCERN_RESP_KEY = lsKey('p4_concern_resp');
+  var p4SysConcerns = [];
+  var p4AiConcerns  = [];
+  var p4ConcernResp = {};
+  try { p4ConcernResp = JSON.parse(localStorage.getItem(P4_CONCERN_RESP_KEY) || '{}'); } catch(e) { p4ConcernResp = {}; }
+  function saveP4ConcernResp() { try { localStorage.setItem(P4_CONCERN_RESP_KEY, JSON.stringify(p4ConcernResp)); } catch(e) {} }
+
+  // システムチェック — 将来 API 連携しやすい関数構造
+  function runSystemCheck() {
+    var results = [];
+    // 文字数チェック
+    var overLimit = [], tooShort = [];
+    MEDIA.forEach(function(m) {
+      var len = distData[m.id].text.length;
+      var tag = m.tabLabel || m.label;
+      if (len > m.limit) overLimit.push(tag + '(' + len + '>' + m.limit + '字)');
+      else if (m.limitMin > 0 && len > 0 && len < m.limitMin) tooShort.push(tag + '(' + len + '<' + m.limitMin + '字)');
+    });
+    var charOk = overLimit.length === 0 && tooShort.length === 0;
+    results.push({ id:'sys_char', label:'文字数', status: charOk ? 'ok' : 'warn',
+      detail: charOk ? '全媒体の文字数が規定内です。' :
+              overLimit.length ? '上限超過: ' + overLimit.join('、') : '目安以下: ' + tooShort.join('、'),
+      concern: charOk ? null :
+               overLimit.length ? '文字数が上限を超えている媒体があります: ' + overLimit.join('、') :
+               '文字数が目安以下の媒体があります: ' + tooShort.join('、') });
+    // 空欄チェック
+    var emptyMedia = MEDIA.filter(function(m) { return !distData[m.id].text.trim(); });
+    var emptyOk = emptyMedia.length === 0;
+    results.push({ id:'sys_empty', label:'空欄', status: emptyOk ? 'ok' : 'warn',
+      detail: emptyOk ? '全媒体に本文があります。' :
+              '空欄: ' + emptyMedia.map(function(m) { return m.tabLabel || m.label; }).join('、'),
+      concern: emptyOk ? null : '本文が空の媒体があります: ' + emptyMedia.map(function(m) { return m.tabLabel || m.label; }).join('、') });
+    // 媒体別本文の有無
+    var bodyStatus = MEDIA.map(function(m) {
+      var len = distData[m.id].text.trim().length;
+      return (m.tabLabel || m.label) + ': ' + (len > 0 ? len + '字' : '空');
+    }).join(' / ');
+    results.push({ id:'sys_body', label:'媒体別本文の有無', status: emptyOk ? 'ok' : 'warn',
+      detail: bodyStatus, concern: null });
+    // ready 未到達媒体
+    var notReady = MEDIA.filter(function(m) {
+      var st = distData[m.id].status; return st !== 'ready' && st !== 'published';
+    });
+    var readyOk = notReady.length === 0;
+    results.push({ id:'sys_ready', label:'ready 未到達媒体', status: readyOk ? 'ok' : 'warn',
+      detail: readyOk ? '全媒体が発信準備OK以上です。' :
+              '未到達: ' + notReady.map(function(m) { return (m.tabLabel || m.label) + '(' + (STATUS_LABELS[distData[m.id].status] || distData[m.id].status) + ')'; }).join('、'),
+      concern: readyOk ? null : '発信準備OKに達していない媒体があります: ' + notReady.map(function(m) { return m.tabLabel || m.label; }).join('、') });
+    // 発信済み状態
+    var pubList = MEDIA.filter(function(m) { return distData[m.id].status === 'published'; });
+    results.push({ id:'sys_pub', label:'発信済み状態', status: 'info',
+      detail: pubList.length + ' / ' + MEDIA.length + ' 媒体が発信済み' +
+              (pubList.length ? ': ' + pubList.map(function(m) { return m.tabLabel || m.label; }).join('、') : ''),
+      concern: null });
+    return results;
+  }
+
+  // AI verifier チェック — フロント内仮ロジック / 将来 API で置き換え
+  function runAiVerifierCheck() {
+    var noteText = (distData['note_jp'] && distData['note_jp'].text) || '';
+    var enText   = (distData['linkedin_en'] && distData['linkedin_en'].text) || '';
+    var hasNote  = noteText.trim().length >= 200;
+    var hasEn    = enText.trim().length >= 100;
+    var hasAll   = MEDIA.filter(function(m) { return distData[m.id].text.trim().length > 0; }).length === MEDIA.length;
+    return [
+      { id:'ai_brand_tone', label:'ブランドトーン', status: hasNote ? 'ok' : 'warn',
+        detail: hasNote ? 'note 正本のトーンを確認しました（仮チェック）。' : 'note 正本が不足のためトーン確認不可。',
+        concern: hasNote ? null : 'note 正本が不足しているためブランドトーンを検証できません。' },
+      { id:'ai_controversy', label:'炎上リスク', status: 'ok',
+        detail: '炎上リスクの高い表現は検出されませんでした（仮チェック）。', concern: null },
+      { id:'ai_misread', label:'誤解リスク', status: hasNote ? 'ok' : 'warn',
+        detail: hasNote ? '誤解リスクの高い表現は検出されませんでした（仮チェック）。' : 'note 正本が不足のため誤解リスク確認不可。',
+        concern: hasNote ? null : 'note 正本が不足しているため誤解リスクを検証できません。' },
+      { id:'ai_en_quality', label:'英語品質', status: hasEn ? 'ok' : 'warn',
+        detail: hasEn ? '英語媒体（LinkedIn 等）の本文が入力されています（仮チェック）。' : 'LinkedIn の英語本文が不足しているため確認不可。',
+        concern: hasEn ? null : 'LinkedIn 等の英語媒体の本文が不足しています。英語品質の検証ができません。' },
+      { id:'ai_note_diff', label:'note 正本とのズレ', status: (hasNote && hasAll) ? 'ok' : 'warn',
+        detail: (hasNote && hasAll) ? '全媒体と note 正本の整合性を確認しました（仮チェック）。' :
+                !hasNote ? 'note 正本が不足のため整合性確認不可。' : '空の媒体があるため整合性確認不完全。',
+        concern: (hasNote && hasAll) ? null :
+                 !hasNote ? 'note 正本が入力されていないため整合性確認ができません。' :
+                 '本文が空の媒体があるため整合性確認が完全にできません。' },
+      { id:'ai_compliance', label:'コンプライアンス注意', status: 'ok',
+        detail: '機密情報・本名等の不適切な露出は検出されませんでした（仮チェック）。', concern: null }
+    ];
+  }
+
+  // チェック結果レンダリング
+  function renderCheckResults(containerId, results, doneLabel) {
+    var el = document.getElementById(containerId);
+    if (!el) return [];
+    var hasWarn = results.some(function(r) { return r.status === 'warn'; });
+    var icons = { ok: '✅', warn: '⚠️', info: 'ℹ️' };
+    var html = results.map(function(r) {
+      return '<div class="p4-check-item' + (r.status === 'info' ? ' is-info' : '') + '">' +
+        '<span class="p4-check-icon">' + (icons[r.status] || 'ℹ️') + '</span>' +
+        '<div class="p4-check-body">' +
+          '<div class="p4-check-label">' + escAttr(r.label) + '</div>' +
+          '<div class="p4-check-detail">' + escAttr(r.detail) + '</div>' +
+        '</div></div>';
+    }).join('');
+    html += '<div class="p4-section-result ' + (hasWarn ? 'warn' : 'ok') + '">' +
+      (hasWarn ? '⚠ 懸念点あり — 下記「留保・懸念点」を確認してください' : '✅ ' + (doneLabel || 'チェック完了')) +
+    '</div>';
+    el.innerHTML = html;
+    return results.filter(function(r) { return r.concern; });
+  }
+
+  // 懸念点アイテムのレンダリング + イベント付与
+  function renderConcernItems(containerId, concerns, prefix) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!concerns || concerns.length === 0) {
+      el.innerHTML = '<div class="p4-no-concerns">✅ 懸念点はありません</div>';
+      return;
+    }
+    el.innerHTML = concerns.map(function(c) {
+      var cId  = prefix + '_' + c.id;
+      var resp = p4ConcernResp[cId] || {};
+      return '<div class="p4-concern-item' + (resp.done ? ' done' : '') + '" id="citem-' + cId + '">' +
+        '<div class="p4-concern-text">⚠ ' + escAttr(c.concern) + '</div>' +
+        '<div class="p4-concern-done-row">' +
+          '<input type="checkbox" id="cdone-' + cId + '"' + (resp.done ? ' checked' : '') + '>' +
+          '<label class="p4-concern-done-label" for="cdone-' + cId + '">対応済み</label>' +
+        '</div>' +
+        '<textarea class="p4-concern-memo" id="cmemo-' + cId +
+          '" placeholder="修正メモ（任意）">' + escAttr(resp.memo || '') + '</textarea>' +
+      '</div>';
+    }).join('');
+    concerns.forEach(function(c) {
+      var cId    = prefix + '_' + c.id;
+      var cbEl   = document.getElementById('cdone-' + cId);
+      var memoEl = document.getElementById('cmemo-' + cId);
+      var itemEl = document.getElementById('citem-' + cId);
+      if (cbEl) cbEl.addEventListener('change', function() {
+        if (!p4ConcernResp[cId]) p4ConcernResp[cId] = {};
+        p4ConcernResp[cId].done = cbEl.checked;
+        if (itemEl) itemEl.classList.toggle('done', cbEl.checked);
+        saveP4ConcernResp();
+      });
+      if (memoEl) memoEl.addEventListener('input', function() {
+        if (!p4ConcernResp[cId]) p4ConcernResp[cId] = {};
+        p4ConcernResp[cId].memo = memoEl.value;
+        saveP4ConcernResp();
+      });
+    });
+  }
+
+  function refreshConcernsSection() {
+    var section = document.getElementById('p4-concerns-section');
+    var hasConcerns = p4SysConcerns.length > 0 || p4AiConcerns.length > 0;
+    if (section) section.style.display = hasConcerns ? '' : 'none';
+    renderConcernItems('p4-sys-concerns', p4SysConcerns, 'sys');
+    renderConcernItems('p4-ai-concerns', p4AiConcerns, 'ai');
+  }
+
+  // システムチェック 実行ボタン
+  document.getElementById('p4-run-sys-btn').addEventListener('click', function() {
+    var btn = this;
+    btn.textContent = '確認中…'; btn.disabled = true;
+    var results = runSystemCheck();
+    p4SysConcerns = renderCheckResults('p4-sys-results', results, 'システムチェック完了');
+    refreshConcernsSection();
+    btn.textContent = '▶ 再実行'; btn.disabled = false;
+    showToast('システムチェックが完了しました。', null, 1800);
+  });
+
+  // AI verifier チェック 実行ボタン
+  document.getElementById('p4-run-ai-btn').addEventListener('click', function() {
+    var btn = this;
+    btn.textContent = '確認中…'; btn.disabled = true;
+    setTimeout(function() {
+      var results = runAiVerifierCheck();
+      p4AiConcerns = renderCheckResults('p4-ai-results', results, 'AI verifier チェック完了（仮）');
+      refreshConcernsSection();
+      btn.textContent = '▶ 再実行'; btn.disabled = false;
+      showToast('AI verifier チェックが完了しました（仮チェック）。', null, 2000);
+    }, 500);
+  });
+
+  // Phase 3 へ戻るボタン
+  document.getElementById('p4-back-btn').addEventListener('click', function() {
+    setPhase('3');
+    showToast('← Phase 3 に戻りました。', null, 1500);
+  });
+
+  // 検証完了・Phase 5 へ進むボタン
+  document.getElementById('p4-complete-btn').addEventListener('click', function() {
+    var checkedCount = 0;
+    VERIFY_ITEMS.forEach(function(it) {
+      var cb = document.getElementById('vchk-' + it.id);
+      if (cb && cb.checked) checkedCount++;
+    });
+    var pendingSys = p4SysConcerns.filter(function(c) { return !(p4ConcernResp['sys_' + c.id] || {}).done; });
+    var pendingAi  = p4AiConcerns.filter(function(c) { return !(p4ConcernResp['ai_' + c.id] || {}).done; });
+    var msg = '';
+    if (checkedCount < VERIFY_ITEMS.length) msg += '手動チェックリストが ' + checkedCount + ' / ' + VERIFY_ITEMS.length + ' 項目です。\n';
+    if (pendingSys.length + pendingAi.length > 0) msg += '未対応の懸念点が ' + (pendingSys.length + pendingAi.length) + ' 件残っています。\n';
+    if (msg && !confirm(msg + '\nこのまま Phase 5 へ進みますか？')) return;
+    setPhase('5');
+    showToast('✅ 検証完了。Phase 5 へ進みました。', null, 2000);
+  });
+
   // ---- Phase 5: 配信状態テーブル(機能版 / localStorage保存) ----
   const DIST_STATES = ['未配信', '下書き済', '配信済'];
   function distStamp(){
@@ -1624,23 +2618,162 @@
     });
   }
 
-  // ---- Phase 1: トピック差込口(将来差し替え) ----
-  // 将来 weekly_topics/<WEEK>/topics.html のダイジェストHTMLを取得し、
-  // window.AIcoRenderTopics(htmlString) に渡すだけで #phase1-topics-mount を差し替えられる構成。
-  // file:// では fetch が CORS で失敗するため、当面は手動運用(下記ボタンで手順を案内)。
+  // ---- Phase 1: トピック候補 (アクティブUI) ----
   (function initPhase1(){
-    const wk = document.getElementById('p1-week');
-    if (wk) wk.textContent = WEEK;
+    // 将来差込口は引き続き維持: window.AIcoRenderTopics(html) で外部から差し替え可能
     window.AIcoRenderTopics = function(htmlString){
-      const mount = document.getElementById('phase1-topics-mount');
-      if (mount && typeof htmlString === 'string') mount.innerHTML = htmlString;
+      var mount = document.getElementById('phase1-topics-mount');
+      if (mount && typeof htmlString === 'string') { mount.innerHTML = htmlString; mount.style.display = ''; }
     };
-    const hintBtn = document.getElementById('p1-load-hint');
-    if (hintBtn){
-      hintBtn.addEventListener('click', function(){
-        showToast('差し替え手順:\n① weekly_topics/' + WEEK + '/topics.html を生成(aico-weekly-topics)\n② そのダイジェストHTMLを AIcoRenderTopics(html) に渡す\n③ PICK → Phase2 へ。当面は手動運用。', null, 4600);
+
+    var P1_KEYWORDS_KEY = lsKey('p1_keywords');
+
+    var TOPIC_TEMPLATES = [
+      { title: 'AIと放送業界の融合 — 2026年に何が変わるか',
+        reader: '放送業界関係者・メディア経営者',
+        media: 'note / LinkedIn / Substack',
+        noteEase: '★★★★☆', tags: ['AI', 'テレビ局', '放送', 'メディア'] },
+      { title: 'YouTubeがテレビになった後の「編成」戦略',
+        reader: '35〜64歳の視聴者層を抱えるメディア担当者',
+        media: 'note / YouTube概要欄',
+        noteEase: '★★★★★', tags: ['YouTube', 'テレビ局', '編成', '動画'] },
+      { title: '個人ブランディング 2.0 — AIと共存するクリエイターの生き方',
+        reader: 'フリーランス・個人事業主・副業者',
+        media: 'note / LinkedIn / Instagram',
+        noteEase: '★★★★☆', tags: ['個人ブランディング', 'AI', 'クリエイター'] },
+      { title: 'ローカル資源を海外収益に変える3つのフォーマット',
+        reader: '地方局・地域メディア・海外展開を模索する企業',
+        media: 'note / Substack / LinkedIn',
+        noteEase: '★★★★☆', tags: ['海外展開', '地方', 'コンテンツ', 'テレビ局'] },
+      { title: 'LinkedInで日本人が取りこぼしている「思想発信」の機会',
+        reader: 'ビジネスパーソン・日本語圏の専門家',
+        media: 'LinkedIn / note',
+        noteEase: '★★★☆☆', tags: ['LinkedIn', '個人ブランディング', '海外展開', '英語'] },
+      { title: 'Substackで月収を作る — ニュースレター収益化の現実',
+        reader: 'コンテンツクリエイター・ライター',
+        media: 'note / Substack',
+        noteEase: '★★★★☆', tags: ['Substack', '収益化', '個人ブランディング'] },
+      { title: 'X スレッドで専門家としての存在感を作る技術',
+        reader: 'X ユーザー・思想を発信したい専門家',
+        media: 'note / X スレッド',
+        noteEase: '★★★★☆', tags: ['X', 'SNS', '個人ブランディング'] },
+      { title: 'AIライターと人間編集者の役割分担 — 2026年版',
+        reader: 'メディア編集者・コンテンツ制作者',
+        media: 'note / LinkedIn / Substack',
+        noteEase: '★★★★★', tags: ['AI', '編集', 'メディア', 'コンテンツ'] },
+      { title: '地方局がYouTubeで生き残るための「編成筋肉」の使い方',
+        reader: '地方放送局・地域メディア関係者',
+        media: 'note / YouTube概要欄',
+        noteEase: '★★★★★', tags: ['テレビ局', 'YouTube', '地方', '編成'] },
+      { title: '日本語コンテンツを英語圏に届ける3つの障壁と突破口',
+        reader: '海外展開を目指す日本語クリエイター',
+        media: 'Substack / LinkedIn / note',
+        noteEase: '★★★★☆', tags: ['海外展開', '英語', 'グローバル', 'コンテンツ'] },
+      { title: 'Instagram カルーセルで思想を伝える — 視覚発信の設計術',
+        reader: 'Instagram 活用者・ビジュアルコンテンツ制作者',
+        media: 'Instagram / note',
+        noteEase: '★★★☆☆', tags: ['Instagram', 'SNS', '個人ブランディング'] },
+      { title: 'クリエイターエコノミーの次の波 — 2027年に来るもの',
+        reader: 'クリエイター・メディア産業関係者',
+        media: 'note / Substack / LinkedIn',
+        noteEase: '★★★★☆', tags: ['クリエイター', '収益化', 'トレンド', 'AI'] },
+      { title: 'AIコーチングとパーソナルブランド — 新しい価値提供の形',
+        reader: 'コーチ・コンサルタント・個人事業主',
+        media: 'note / LinkedIn / Instagram',
+        noteEase: '★★★★☆', tags: ['AI', '個人ブランディング', 'コーチング'] },
+      { title: 'ショート動画 vs 長尺コンテンツ — 媒体別の最適解',
+        reader: '動画コンテンツ制作者・マーケター',
+        media: 'note / YouTube概要欄 / Instagram',
+        noteEase: '★★★☆☆', tags: ['YouTube', 'Instagram', '動画マーケティング', 'SNS'] },
+      { title: '放送のROICを上げる3つの新フォーマット',
+        reader: 'メディア経営者・事業開発担当者',
+        media: 'note / LinkedIn',
+        noteEase: '★★★★☆', tags: ['テレビ局', '放送', '収益化', 'YouTube'] }
+    ];
+
+    function generateTopics(rawInput) {
+      var kw = rawInput.trim();
+      if (!kw) return TOPIC_TEMPLATES.slice(0, 10);
+      var keys = kw.split(/[,、，\s]+/).map(function(k) { return k.trim(); }).filter(Boolean);
+      var scored = TOPIC_TEMPLATES.map(function(t) {
+        var score = 0;
+        keys.forEach(function(k) {
+          t.tags.forEach(function(tag) {
+            if (tag.indexOf(k) >= 0 || k.indexOf(tag) >= 0) score += 2;
+          });
+          if (t.title.indexOf(k) >= 0) score += 1;
+          if (t.reader.indexOf(k) >= 0) score += 1;
+        });
+        return { topic: t, score: score };
       });
+      scored.sort(function(a, b) { return b.score - a.score; });
+      return scored.slice(0, 10).map(function(s) { return s.topic; });
     }
+
+    function renderTopicCards(topics, kwText) {
+      var area = document.getElementById('p1-topic-area');
+      var grid = document.getElementById('p1-topic-grid');
+      var noteEl = document.getElementById('p1-count-note');
+      if (!area || !grid) return;
+      noteEl.textContent = kwText.trim()
+        ? '「' + kwText.trim() + '」に関連するトピック候補 ' + topics.length + ' 本'
+        : '標準テーマからのトピック候補 ' + topics.length + ' 本';
+      grid.innerHTML = '';
+      topics.forEach(function(t, i) {
+        var card = document.createElement('div');
+        card.className = 'p1-topic-card';
+        card.innerHTML =
+          '<div class="p1-topic-num">候補 ' + (i + 1) + '</div>' +
+          '<div class="p1-topic-title">' + escAttr(t.title) + '</div>' +
+          '<div class="p1-topic-meta">' +
+            '<strong>想定読者:</strong> ' + escAttr(t.reader) + '<br>' +
+            '<strong>展開しやすい媒体:</strong> ' + escAttr(t.media) +
+          '</div>' +
+          '<div class="p1-topic-ease">note化しやすさ: ' + t.noteEase + '</div>' +
+          '<button type="button" class="p1-pick-btn" data-idx="' + i + '">このトピックで原稿へ進む →</button>';
+        grid.appendChild(card);
+      });
+      area.style.display = '';
+      area._topics = topics;
+    }
+
+    function pickTopic(topic) {
+      var memoEl = document.getElementById('memo');
+      if (memoEl) {
+        var entry = '[トピック選択] ' + topic.title +
+          '\n想定読者: ' + topic.reader +
+          '\n媒体: ' + topic.media + '\n\n';
+        memoEl.value = entry + (memoEl.value ? memoEl.value : '');
+        try { localStorage.setItem(LS_KEY, memoEl.value); } catch(e) {}
+      }
+      setPhase('2');
+      showToast('📝 トピックを選択しました。Phase 2 でメモを確認してください。', null, 2800);
+    }
+
+    var kwEl  = document.getElementById('p1-keywords');
+    var genBtn = document.getElementById('p1-generate-btn');
+    var area   = document.getElementById('p1-topic-area');
+
+    try { var saved = localStorage.getItem(P1_KEYWORDS_KEY); if (saved && kwEl) kwEl.value = saved; } catch(e) {}
+
+    if (kwEl) kwEl.addEventListener('input', function() {
+      try { localStorage.setItem(P1_KEYWORDS_KEY, kwEl.value); } catch(e) {}
+    });
+
+    if (genBtn) genBtn.addEventListener('click', function() {
+      var kw = kwEl ? kwEl.value : '';
+      var topics = generateTopics(kw);
+      renderTopicCards(topics, kw);
+      showToast('📋 ' + topics.length + ' 本のトピック候補を生成しました。', null, 1800);
+    });
+
+    if (area) area.addEventListener('click', function(e) {
+      var btn = e.target.closest('.p1-pick-btn');
+      if (!btn) return;
+      var topics = area._topics;
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (topics && topics[idx]) pickTopic(topics[idx]);
+    });
   })();
 
   // ---- 初期フェーズ復元(既定は Phase 2 = 既存挙動を温存) ----
