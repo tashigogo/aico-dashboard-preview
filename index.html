@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W21 #3 v2 / マイクUI v2 — 自由録音方式</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #1A1A1A;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Mincho ProN", "Yu Mincho", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 300px; /* room for sticky control bar (mic/clear/export/send + textarea) */
+  }
+
+  /* ---- Header ---- */
+  header.meta {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 24px;
+    border-bottom: 1px solid #ececec;
+  }
+  .meta-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: -apple-system, "Helvetica Neue", sans-serif;
+  }
+  .meta h1 {
+    font-size: 26px;
+    line-height: 1.5;
+    margin: 0 0 18px;
+    color: #1A1A1A;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .meta .stats {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: #777;
+    font-family: -apple-system, sans-serif;
+  }
+  .meta .stats strong {
+    color: #1A1A1A;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .ui-badge {
+    display: inline-block;
+    margin-left: 8px;
+    background: #c0392b;
+    color: #FFFFFF;
+    padding: 2px 9px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .browser-warning {
+    max-width: 720px;
+    margin: 14px auto 0;
+    padding: 12px 16px;
+    background: #fff5d6;
+    border-left: 3px solid #d4a82a;
+    font-size: 13px;
+    color: #6a541a;
+    border-radius: 0 4px 4px 0;
+    font-family: -apple-system, sans-serif;
+  }
+
+  /* ---- Body (note-style, clean — no marker boxes) ---- */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 36px 20px 40px;
+    font-size: 17.5px;
+    line-height: 1.85;
+    color: #1A1A1A;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "BIZ UDPMincho", serif;
+  }
+  main p {
+    margin: 0 0 1.8em;
+    text-align: justify;
+    text-justify: inter-character;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+
+  /* ---- Sticky control bar ---- */
+  .control-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid #ececec;
+    padding: 18px 20px 20px;
+    z-index: 100;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+  }
+  .control-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .control-row1 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .mic-btn {
+    background: #c0392b;
+    border: none;
+    color: #FFFFFF;
+    padding: 0 26px;
+    height: 56px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 4px 14px rgba(192, 57, 43, 0.35);
+    min-width: 200px;
+    justify-content: center;
+  }
+  .mic-btn:hover {
+    background: #a52a1c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(192, 57, 43, 0.45);
+  }
+  .mic-btn:active { transform: translateY(0); }
+  .mic-btn.recording {
+    background: #7a1d12;
+    animation: btnPulse 1.2s infinite ease-in-out;
+  }
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.7), 0 4px 14px rgba(192, 57, 43, 0.35); }
+    50% { box-shadow: 0 0 0 14px rgba(192, 57, 43, 0), 0 6px 18px rgba(192, 57, 43, 0.45); }
+  }
+  .mic-btn:disabled {
+    background: #c0a59f;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .status {
+    font-size: 13.5px;
+    color: #555;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    flex: 1;
+  }
+  .status.is-recording { color: #c0392b; font-weight: 700; }
+  .send-btn {
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border: none;
+    padding: 0 22px;
+    height: 56px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 4px 14px rgba(26, 26, 26, 0.25);
+    min-width: 200px;
+  }
+  .send-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(26, 26, 26, 0.3);
+  }
+  .send-btn:active { transform: translateY(0); }
+
+  .memo-area {
+    width: 100%;
+    height: 120px;
+    padding: 12px 14px;
+    border: 1.5px solid #d8d6d0;
+    border-radius: 8px;
+    background: #FAFAF7;
+    color: #1A1A1A;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    resize: vertical;
+  }
+  .memo-area:focus {
+    outline: none;
+    border-color: #c0392b;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+  }
+  .memo-area::placeholder {
+    color: #aaa;
+    font-size: 15px;
+  }
+
+  footer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 20px 24px;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.7;
+    font-family: -apple-system, sans-serif;
+  }
+  footer code {
+    background: #f0eee8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: #444;
+  }
+
+  /* ---- Version toggle (fixed top-right) ---- */
+  .version-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 200;
+    display: flex;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #dddbd4;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .ver-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 13px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .ver-btn + .ver-btn { border-left: 1px solid #e6e4dd; }
+  .ver-btn:hover { background: #f3f1ea; color: #555; }
+  .ver-btn.active { background: #1A1A1A; color: #FFFFFF; }
+
+  /* ---- v1 structured article elements ---- */
+  main h2 {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 2.2em 0 0.9em;
+    padding-bottom: 0.35em;
+    border-bottom: 1px solid #ececec;
+    line-height: 1.5;
+    color: #1A1A1A;
+  }
+  main h3 {
+    font-size: 16.5px;
+    font-weight: 700;
+    margin: 1.8em 0 0.7em;
+    color: #1A1A1A;
+  }
+  main ul {
+    margin: 0 0 1.8em;
+    padding-left: 1.3em;
+  }
+  main li {
+    margin-bottom: 0.6em;
+    line-height: 1.7;
+    font-size: 15.5px;
+  }
+  main strong { font-weight: 700; }
+  .data-note {
+    background: #FAFAF7;
+    border-left: 3px solid #c9c4b6;
+    padding: 14px 16px;
+    margin: 0 0 1.8em;
+    font-size: 15px;
+    line-height: 1.75;
+    border-radius: 0 4px 4px 0;
+  }
+  .v1-banner {
+    display: block;
+    font-size: 12.5px;
+    color: #8a6d1a;
+    background: #fff5d6;
+    border: 1px solid #e9d79a;
+    border-radius: 6px;
+    padding: 8px 13px;
+    margin-bottom: 1.8em;
+    font-family: -apple-system, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* ---- Clear button (subdued grey, no warning color) ---- */
+  .clear-btn {
+    background: #ECEAE3;
+    color: #6b6b6b;
+    border: 1px solid #dcd9d0;
+    padding: 0 18px;
+    height: 56px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background 0.15s, color 0.15s;
+  }
+  .clear-btn:hover { background: #e2dfd6; color: #4a4a4a; }
+  .clear-btn:active { background: #d8d4ca; }
+
+  /* ---- Export (handwrite-reflect) button ---- */
+  .export-btn {
+    background: #FFFFFF;
+    color: #c0392b;
+    border: 1.5px solid #c0392b;
+    padding: 0 18px;
+    height: 56px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .export-btn:hover { background: #fdecea; box-shadow: 0 4px 14px rgba(192, 57, 43, 0.18); }
+  .export-btn:active { background: #fadcd7; }
+
+  /* ---- 手書き修正モード (contenteditable on #content-v2) ---- */
+  #content-v2[contenteditable="true"] { outline: none; }
+  #content-v2[contenteditable="true"] p {
+    border-left: 3px solid transparent;
+    margin-left: -13px;   /* offset border(3)+padding(10) so text x-position is stable */
+    padding-left: 10px;
+    border-radius: 0 3px 3px 0;
+    transition: background 0.12s, border-color 0.12s;
+    cursor: text;
+  }
+  #content-v2[contenteditable="true"] p:hover { background: rgba(0, 0, 0, 0.02); }
+  #content-v2[contenteditable="true"] p.editing {
+    border-left-color: #c0392b;
+    background: rgba(192, 57, 43, 0.03);
+  }
+
+  /* ---- Autosave indicator (under version toggle) ---- */
+  .save-indicator {
+    position: fixed;
+    top: 50px;
+    right: 12px;
+    z-index: 199;
+    font-size: 11px;
+    color: #888;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 3px 9px;
+    border-radius: 8px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  /* ---- Restore banner (F5 で前回編集を復元) ---- */
+  .restore-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 11px 16px;
+    font-size: 13px;
+    z-index: 300;
+    transform: translateY(-100%);
+    transition: transform 0.25s ease;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  }
+  .restore-banner.show { transform: translateY(0); }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: fixed;
+    bottom: 280px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1A1A1A;
+    color: #FFFFFF;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    opacity: 0;
+    transition: transform 0.2s, opacity 0.2s;
+    max-width: 90vw;
+    z-index: 999;
+    pointer-events: none;
+    white-space: pre-line;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast.error { background: #7a1d12; }
+  .toast.warn { background: #8a6d1a; }
+
+  /* responsive button labels: short variants hidden on desktop */
+  .lbl-short { display: none; }
+
+  /* ---- Mobile (smartphone-first / iPhone 375px) ---- */
+  @media (max-width: 600px) {
+    .meta { padding: 18px 16px 18px; } /* fixed toggle no longer needs huge top gap */
+    .meta h1 { font-size: 20px; line-height: 1.45; }
+    .meta .stats { gap: 12px; font-size: 12px; }
+    main {
+      font-size: 16.5px;
+      line-height: 1.85;
+      padding: 24px 16px 28px;
+    }
+    main h2 { font-size: 17.5px; }
+    main h3 { font-size: 15.5px; }
+
+    /* ---- compact control bar (Phase 2 only) ---- */
+    .control-bar { padding: 10px 12px 12px; }
+    .control-inner { gap: 8px; }
+    .control-row1 { gap: 8px; }
+    .mic-btn { order: 1; flex: 1 0 100%; height: 50px; min-width: 0; font-size: 15.5px; }
+    .status { order: 2; flex: 1 0 100%; text-align: center; font-size: 12.5px; }
+    .clear-btn, .export-btn, .send-btn {
+      flex: 1 1 0; min-width: 0; height: 46px; padding: 0 8px;
+      font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .clear-btn { order: 3; } .export-btn { order: 4; } .send-btn { order: 5; }
+    .lbl-full { display: none; }   /* swap to short labels on mobile */
+    .lbl-short { display: inline; }
+    .memo-area { height: 78px; font-size: 16px; } /* 16px = avoid iOS focus zoom */
+
+    body { padding-bottom: 270px; } /* shrunk from 470: compact bar */
+    .toast { bottom: 286px; }
+    .version-toggle { top: 52px; right: 8px; } /* sits just under phase-nav */
+    .ver-btn { padding: 8px 11px; font-size: 11.5px; }
+    .save-indicator { top: 86px; right: 8px; }
+  }
+
+  /* ============================================================
+     ===== 5-Phase dashboard extension (v3) =====
+     ============================================================ */
+
+  /* ---- Phase navigation stepper (fixed top) ---- */
+  .phase-nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 50px;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #ececec;
+    display: flex; justify-content: center; gap: 2px;
+    z-index: 150; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 0 8px;
+  }
+  .phase-btn {
+    background: transparent; border: none; border-bottom: 2.5px solid transparent;
+    color: #999; font-size: 13px; font-weight: 600; padding: 0 14px; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: color .15s, border-color .15s, background .15s;
+    white-space: nowrap; display: flex; align-items: center; gap: 5px;
+  }
+  .phase-btn:hover { color: #555; background: #f6f4ee; }
+  .phase-btn.active { color: #c0392b; border-bottom-color: #c0392b; }
+  .phase-btn .pnum {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 19px; height: 19px; border-radius: 50%;
+    background: #ECEAE3; color: #888; font-size: 11px; font-weight: 700;
+  }
+  .phase-btn.active .pnum { background: #c0392b; color: #fff; }
+
+  /* ---- Phase sections ---- */
+  body { padding-top: 50px; } /* clear fixed phase-nav */
+  body:not(.p2) { padding-bottom: 40px; } /* control-bar only on Phase 2 */
+  .phase { display: none; }
+  .phase.phase-active { display: block; }
+  /* relocate Phase 2 fixed widgets below the phase-nav */
+  .version-toggle { top: 60px; z-index: 140; }
+  .save-indicator { top: 96px; }
+
+  .phase-wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+  .phase-wrap h2.phase-title {
+    font-size: 21px; font-weight: 700; margin: 0 0 6px; color: #1A1A1A;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .phase-wrap .phase-sub {
+    font-size: 13px; color: #888; margin: 0 0 24px; line-height: 1.8;
+    font-family: -apple-system, sans-serif;
+  }
+  .skeleton-card {
+    border: 1.5px dashed #d8d6d0; border-radius: 10px; padding: 22px;
+    background: #FAFAF7; color: #777; font-size: 14px; line-height: 1.9;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .skeleton-card code { background:#f0eee8; padding:1px 5px; border-radius:3px; font-size:12px; }
+  .skeleton-badge {
+    display: inline-block; background: #ECEAE3; color: #888; font-size: 11px;
+    font-weight: 700; padding: 2px 9px; border-radius: 10px; margin-bottom: 10px; letter-spacing: 0.04em;
+  }
+  .skeleton-card ul { margin: 8px 0 0; padding-left: 1.2em; }
+  .skeleton-card li { margin-bottom: 5px; }
+
+  /* ---- Phase 3: distributor ---- */
+  .source-box {
+    background: #FAFAF7; border: 1px solid #ececec; border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 18px; max-height: 150px; overflow: auto;
+    font-size: 13px; line-height: 1.7; color: #555;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  }
+  .source-box .src-label {
+    display: block; font-size: 11px; color: #999; font-weight: 700;
+    letter-spacing: 0.06em; margin-bottom: 6px; text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+  }
+  .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+  .convert-btn {
+    background: #c0392b; color: #fff; border: none; height: 46px; padding: 0 22px;
+    border-radius: 23px; font-size: 14.5px; font-weight: 700; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    box-shadow: 0 4px 14px rgba(192,57,43,0.3); transition: background .15s, transform .1s;
+  }
+  .convert-btn:hover { background: #a52a1c; transform: translateY(-1px); }
+  .convert-btn:active { transform: translateY(0); }
+  .prompt-btn {
+    background: #fff; color: #c0392b; border: 1.5px solid #c0392b; height: 46px;
+    padding: 0 18px; border-radius: 23px; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s;
+  }
+  .prompt-btn:hover { background: #fdecea; }
+
+  .media-tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid #ececec; }
+  .media-tab {
+    background: transparent; border: 1px solid transparent; border-bottom: none;
+    color: #888; font-size: 12.5px; font-weight: 600; padding: 9px 13px; cursor: pointer;
+    border-radius: 7px 7px 0 0; position: relative; top: 1px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s, color .15s;
+  }
+  .media-tab:hover { background: #f6f4ee; color: #555; }
+  .media-tab.active { color: #c0392b; border-color: #ececec; background: #fff; font-weight: 700; }
+  .media-tab .filled-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #2a9d4a; margin-left: 5px; vertical-align: middle; opacity: 0;
+  }
+  .media-tab.filled .filled-dot { opacity: 1; }
+  .media-panel {
+    display: none; border: 1px solid #ececec; border-top: none;
+    border-radius: 0 0 9px 9px; padding: 16px; background: #fff;
+  }
+  .media-panel.active { display: block; }
+  .media-panel .panel-hint {
+    font-size: 12px; color: #8a8a8a; line-height: 1.7; margin: 0 0 10px;
+    font-family: -apple-system, sans-serif;
+    background: #FAFAF7; border-left: 3px solid #d4cfc0; padding: 9px 12px; border-radius: 0 4px 4px 0;
+  }
+  .media-output {
+    width: 100%; min-height: 200px; padding: 13px 15px; border: 1.5px solid #d8d6d0;
+    border-radius: 8px; background: #fff; color: #1A1A1A; font-size: 14.5px; line-height: 1.7;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif; resize: vertical;
+  }
+  .media-output:focus { outline: none; border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+  .panel-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 12px; }
+  .char-count { font-size: 12px; color: #888; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .char-count.over { color: #c0392b; font-weight: 700; }
+  .copy-btn {
+    background: #1A1A1A; color: #fff; border: none; height: 38px; padding: 0 16px;
+    border-radius: 19px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s;
+  }
+  .copy-btn:hover { background: #333; }
+
+  /* ---- Phase 4: verifier ---- */
+  .verify-list { list-style: none; margin: 0 0 24px; padding: 0; }
+  .verify-item {
+    display: flex; align-items: flex-start; gap: 12px; padding: 13px 15px;
+    border: 1px solid #ececec; border-radius: 9px; margin-bottom: 9px; background: #fff;
+    transition: background .15s, border-color .15s;
+  }
+  .verify-item.checked { background: #f3f9f4; border-color: #bfe2c6; }
+  .verify-item input[type="checkbox"] { width: 20px; height: 20px; margin-top: 1px; cursor: pointer; accent-color: #2a9d4a; flex: none; }
+  .verify-item label {
+    font-size: 14.5px; line-height: 1.5; color: #1A1A1A; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .verify-item .vi-note { display: block; font-size: 11.5px; color: #999; margin-top: 3px; }
+  .verify-item .vi-datetime { display: block; margin-top: 7px; font-size: 13px; padding: 5px 8px; border: 1px solid #d8d6d0; border-radius: 6px; font-family: -apple-system, sans-serif; }
+  .verify-status {
+    text-align: center; padding: 18px; border-radius: 10px; font-size: 16px; font-weight: 700;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    background: #FAFAF7; color: #999; border: 1.5px solid #e6e4dd;
+  }
+  .verify-status.ready { background: #2a9d4a; color: #fff; border-color: #2a9d4a; box-shadow: 0 4px 16px rgba(42,157,74,0.3); }
+  .verify-status .vs-count { font-size: 13px; font-weight: 600; display: block; margin-top: 4px; opacity: 0.85; }
+
+  /* ---- Phase 5: skeleton table ---- */
+  .dist-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .dist-table th, .dist-table td { border: 1px solid #ececec; padding: 9px 11px; text-align: left; }
+  .dist-table th { background: #FAFAF7; color: #666; font-weight: 700; font-size: 12px; }
+  .dist-table td { color: #888; }
+  .status-pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 10px; background: #ECEAE3; color: #888; }
+
+  /* ---- AIco brand guardrail bar (全フェーズ常時表示) ---- */
+  .guardrail-bar {
+    max-width: 720px; margin: 18px auto 0; padding: 10px 16px;
+    background: #fbeae7; border: 1px solid #e6b9b0; border-left: 4px solid #c0392b;
+    border-radius: 0 6px 6px 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; position: relative; z-index: 1;
+  }
+  .guardrail-bar .gr-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: #c0392b; white-space: nowrap; }
+  .guardrail-bar .gr-text { font-size: 12px; line-height: 1.7; color: #7a3b32; flex: 1; min-width: 220px; }
+  .guardrail-bar .gr-text b { color: #c0392b; }
+
+  /* ---- Phase 5: functional cards (status table is now live) ---- */
+  .func-card { border: 1px solid #ececec; border-radius: 10px; padding: 18px; background: #fff; margin-bottom: 18px; }
+  .func-card .func-hint { font-size: 12px; color: #888; margin: 0 0 12px; line-height: 1.7; font-family: -apple-system, sans-serif; }
+  .dist-status-select {
+    font-size: 12px; padding: 4px 6px; border: 1px solid #d8d6d0; border-radius: 6px;
+    background: #fff; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; cursor: pointer; color: #1A1A1A;
+  }
+  .dist-url-input {
+    width: 100%; min-width: 120px; font-size: 12px; padding: 5px 7px; border: 1px solid #d8d6d0;
+    border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; color: #1A1A1A;
+  }
+  .dist-sched-input {
+    max-width: 100%; font-size: 12px; padding: 4px 6px; border: 1px solid #d8d6d0; border-radius: 6px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; color: #1A1A1A; background: #fff;
+  }
+  .dist-url-input:focus, .dist-status-select:focus, .dist-sched-input:focus { outline: none; border-color: #c0392b; box-shadow: 0 0 0 2px rgba(192,57,43,0.12); }
+  .dist-table tr[data-media].is-draft { background: #fffdf2; }
+  .dist-table tr[data-media].is-live  { background: #f3f9f4; }
+  .dist-table tr[data-media].is-live .dist-status-select { color: #1e7a37; font-weight: 700; }
+  .dist-ts { white-space: nowrap; font-size: 12px; color: #888; font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+  /* ---- mobile for new phases (smartphone-first) ---- */
+  @media (max-width: 600px) {
+    /* phase-nav: labels kept + horizontal scroll fallback on very narrow screens */
+    .phase-nav {
+      height: 48px; gap: 0; padding: 0; justify-content: flex-start;
+      overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .phase-nav::-webkit-scrollbar { display: none; }
+    .phase-btn { flex: 1 0 auto; min-width: 62px; padding: 0 4px; font-size: 10.5px; gap: 3px; }
+    .phase-btn .ptext { display: inline; } /* keep labels on mobile */
+    .phase-btn .pnum { width: 18px; height: 18px; font-size: 10.5px; }
+    body { padding-top: 48px; }
+    .version-toggle { top: 52px; }
+    .save-indicator { top: 86px; }
+    .phase-wrap { padding: 22px 14px 50px; }
+
+    /* guardrail bar */
+    .guardrail-bar { margin: 12px auto 0; padding: 9px 13px; gap: 6px; }
+    .guardrail-bar .gr-text { font-size: 11.5px; min-width: 0; }
+
+    /* Phase 3: stack action buttons full width, larger tap targets */
+    .action-row { gap: 8px; }
+    .action-row .convert-btn, .action-row .prompt-btn { flex: 1 0 100%; width: 100%; height: 48px; }
+    .media-tab { padding: 9px 11px; font-size: 12px; }
+    .media-output { font-size: 16px; min-height: 220px; } /* 16px avoids iOS zoom */
+    .copy-btn { height: 44px; padding: 0 18px; font-size: 14px; }
+    .char-count { font-size: 12.5px; }
+
+    /* Phase 4: bigger checkboxes + tap area + 16px datetime */
+    .verify-item { padding: 14px 14px; gap: 14px; }
+    .verify-item input[type="checkbox"] { width: 24px; height: 24px; }
+    .verify-item label { font-size: 15px; }
+    .verify-item .vi-datetime { font-size: 16px; padding: 8px 10px; }
+
+    /* Phase 5: table -> stacked cards (no horizontal overflow at 375px) */
+    .func-card { padding: 14px; }
+    .dist-table thead { display: none; }
+    .dist-table, .dist-table tbody, .dist-table tr, .dist-table td { display: block; width: 100%; }
+    .dist-table tr { border: 1px solid #ececec; border-radius: 10px; margin-bottom: 12px; padding: 10px 12px; }
+    .dist-table tr[data-media].is-draft,
+    .dist-table tr[data-media].is-live { border-width: 1px; }
+    .dist-table td { border: none; padding: 7px 0; }
+    .dist-table td::before {
+      content: attr(data-label); display: block; font-size: 11px; color: #999;
+      font-weight: 700; letter-spacing: 0.04em; margin-bottom: 4px;
+    }
+    .dist-table td:first-child {
+      font-weight: 700; font-size: 15.5px; color: #1A1A1A;
+      border-bottom: 1px solid #f0eee8; padding: 0 0 9px; margin-bottom: 3px;
+    }
+    .dist-table td:first-child::before { display: none; }
+    .dist-status-select { width: 100%; font-size: 16px; padding: 9px 8px; }
+    .dist-sched-input { width: 100%; font-size: 16px; padding: 9px 8px; }
+    .dist-url-input { font-size: 16px; padding: 9px 9px; }
+    .dist-ts { font-size: 13px; }
+  }
+</style>
+</head>
+<body class="p2">
+
+<!-- Restore banner (F5 で前回編集を復元したとき 3秒表示) -->
+<div id="restore-banner" class="restore-banner">✍️ 前回の編集を復元しました</div>
+
+<!-- Version toggle (v1 改稿前 / v2 改稿後) -->
+<div class="version-toggle" role="group" aria-label="バージョン切替">
+  <button type="button" id="btn-v1" class="ver-btn">📖 v1 (改稿前)</button>
+  <button type="button" id="btn-v2" class="ver-btn active">📖 v2 (改稿後)</button>
+</div>
+<div id="save-indicator" class="save-indicator" aria-live="polite"></div>
+
+<!-- ===== Phase navigation stepper ===== -->
+<nav class="phase-nav" id="phase-nav" role="tablist" aria-label="ワークフロー フェーズ">
+  <button type="button" class="phase-btn" data-phase="1"><span class="pnum">1</span><span class="ptext">トピック</span></button>
+  <button type="button" class="phase-btn active" data-phase="2"><span class="pnum">2</span><span class="ptext">原稿</span></button>
+  <button type="button" class="phase-btn" data-phase="3"><span class="pnum">3</span><span class="ptext">変換</span></button>
+  <button type="button" class="phase-btn" data-phase="4"><span class="pnum">4</span><span class="ptext">検証</span></button>
+  <button type="button" class="phase-btn" data-phase="5"><span class="pnum">5</span><span class="ptext">配信</span></button>
+</nav>
+
+<!-- ===== トライアル注意書き + AIco ブランドガードレール(全フェーズ常時表示) ===== -->
+<div class="guardrail-bar" role="note" aria-label="トライアル注意書き / AIco ブランドガードレール">
+  <span class="gr-badge">🧪 TRIAL · AIco</span>
+  <span class="gr-text"><b>この画面は AIco ブランディング事業のトライアル用ダッシュボードです。</b>掲載されている原稿・変換文・配信準備情報は<b>検証中</b>のものであり、外部共有・転載・公開投稿は <b>verifier 通過後</b>に行うこと。<br>ブランド表記は <b>AIco</b>。本名・肩書・所属・<b>TOKYO MX 等の機密・顧客情報は不用意に出さない</b>。／ AI言語率 <b>≤ 30%</b>。</span>
+</div>
+
+<!-- ===== Phase 1: トピック候補(将来差し替え用の差込口つき) ===== -->
+<section id="phase-1" class="phase">
+  <div class="phase-wrap">
+    <h2 class="phase-title">① トピック候補</h2>
+    <p class="phase-sub">aico-weekly-topics スキルが生成する週次10本の記事案を表示し PICK するフェーズ。<strong>本タスクでは骨組み(将来差し替え用の差込口つき)。</strong></p>
+    <!-- 差込口: 将来 weekly_topics/<YYYY-WW>/topics.html のダイジェストを #phase1-topics-mount に流し込む。
+         統合時は JS の window.AIcoRenderTopics(htmlString) を呼ぶだけで一覧化できる構成。 -->
+    <div id="phase1-topics-mount">
+      <div class="skeleton-card">
+        <span class="skeleton-badge">骨組み / 将来差し替え</span>
+        <div>差込口 <code>#phase1-topics-mount</code> に <code>weekly_topics/<span id="p1-week">YYYY-WW</span>/topics.html</code> のダイジェストを流し込みます。</div>
+        <ul>
+          <li>analyst が web_search で収集した構造的6本柱 → 記事案10本</li>
+          <li>各案に Five Stars 紐付け / Sources URL / 媒体トラフィック</li>
+          <li>PICK ボタン → Phase 2(原稿執筆)へ遷移</li>
+        </ul>
+        <div style="margin-top:12px;">
+          <button type="button" class="prompt-btn" id="p1-load-hint" style="height:40px;">📂 topics.html の差し替え手順</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Phase 2: 原稿執筆(現行マイクUI v2 をそのまま温存) ===== -->
+<section id="phase-2" class="phase phase-active">
+
+<header class="meta">
+  <div class="meta-tag">W21 · #3 · <span id="ver-label">改稿v2(肉声反映済)</span> <span class="ui-badge">マイクUI v2 自由録音</span></div>
+  <h1>YouTube がテレビになった日 — 35〜64歳を "取り戻す" 2つのフォーマット</h1>
+  <div class="stats">
+    <span><strong>Five Stars</strong>① 世界ニーズ抽出 / ③ ROIC最大化</span>
+    <span><strong>更新</strong>2026-05-24 (v2)</span>
+    <span><strong>方式</strong>マーカー位置縛りなし</span>
+  </div>
+  <div id="browser-warning" class="browser-warning" style="display:none;">
+    ⚠️ このブラウザは Web Speech API に未対応の可能性があります。Chrome / Edge を推奨します(動かない場合は下部テキスト欄に直接入力してください)。
+  </div>
+</header>
+
+<main>
+
+<!-- ===== v2 (改稿後 / 肉声反映済) ── 手書き編集可 ===== -->
+<div id="content-v2" contenteditable="true" spellcheck="false">
+
+<p>米国のリビングで、ある数字が静かに反転した。YouTubeをテレビ画面で観る時間が、スマホで観る時間を超えたのだ。35歳から64歳、つまり地上波の黄金期にチャンネルを回し続けてきた世代からTVを視聴する最後の世代までが、リモコンを握ったままYouTubeを「夜のテレビ」として消費し始めている。Streaming MediaのYear in Review 2026も、Deloitteの2026 M&amp;E Outlookも、揃ってこの地殻変動を年の最大トピックに据えた。スマホで切り抜きを摘み食いする若者の物語ではない。むしろ逆で、ソファに座った大人が、CMの間にチャンネルを変える代わりにサジェスト動画をタップしている、という話なのだ。</p>
+
+<p>ここで多くの放送関係者が誤読する。「ではYouTubeにもっと動画を出そう」と。私は、そうではないと思う。テレビ画面で観られるYouTubeに必要なのは、本数ではなく編成だ。何時から、誰に向けて、どんな並びで、何を当てるか——地上波が半世紀かけて磨いた時間設計の技術こそ今、YouTubeに活用できると思う。切り抜きチャンネルが伸びても放送局の力にはならない。帯の感覚、特番の呼吸、改編期の緊張、視聴者を「今夜見るべきもの」へ繋げる導線の設計。これらこそ、番組を作る力とは別の、編成という地上波の部署が培ってきた筋肉であり、今使うべきものだ。</p>
+
+<p>逆に言えば、この筋肉を持っている組織は世界にそう多くない。米国のネットワーク局、英国のBBC、そして日本のキー局と一部の地方局などではないか。理由は意外と単純だ。編成の腕は「少数のチャンネルが、同じ時間に大勢が観る前提で、何十年も競争しながら時間を設計し続けた」環境で育つ。多チャンネルのケーブルが普及していた国では、視聴が最初から細切れに分散し、一本の流れを編む筋肉がそもそも要らなかった。国営一極で競争のない国でも、数字を奪い合う改編期の緊張は生まれなかっただろう。広告か受信料で支えられた少数の放送局が、毎日24時間ぶんの並びを、何世代も競い合って磨き続けた——それがたまたま米・英・日だった、という話だ。だからこの3国の編成筋肉は、世界的に見ればきわめて希少な筋力なのである。テレビ画面化したYouTubeは、皮肉なことに、いま最も「編成の効く媒体」へと変貌しつつある。アルゴリズムが個人最適を担う一方で、リビングの大画面では家族や夫婦が並んで観るため、個人最適だけでは間が持たない。誰かが束ねた「今夜見るべきもの」を、視聴者は無意識に求め始めている。</p>
+
+<p>時差を伴って、この波は必ず日本に来る——いや、すでに来ていると思われる。60代のスマートテレビ普及率は静かに上がり、リモコンにYouTubeボタンが載った瞬間から、地上波とYouTubeは同じ画面の中で隣り合うライバルになった。問題は、日本のシニア層を「取り戻す」側に回れるのは誰か、だ。広告単価が崩れ、制作費が削られ、若年層がそもそもテレビの前にいない構造の中で、35〜64歳という最後の優良視聴者層をYouTubeに明け渡すか、それとも自局のYouTubeチャンネルへ連れて行くか。経営判断としては、後者に挑戦する意思決定が必要だ。</p>
+
+<p>ただし、地上波の番組をそのまま縦に切って上げても届かない。テレビ画面で観るYouTubeには、テレビ画面で観るYouTubeの編成アプローチがいる。米国先行事例から逆算すると、日本のシニア層を取り戻すには少なくとも2つのフォーマットが要る、というのが現時点での私の仮説だ。</p>
+
+<p>1つ目は「夜帯ニュース・ループ」。20分前後の地域ニュースを1時間ごとに差し替え、夕方から深夜までソファに張り付いた視聴者がいつ点けても「今の地元」が流れている状態を作る。2つ目は「対談型・帯番組」。スタジオもセットも最小、ホスト1人とゲスト1人、毎週同じ曜日同じ時間に必ず更新する。シニア層が最も信頼するのは「いつもの時間にいつもの顔がいる」体験で、これは技術ではなく規律の問題に近い。</p>
+
+<p>YouTubeがテレビになった日、勝つのは動画が上手い組織ではなく、時間を編める組織ではないだろうか。</p>
+
+</div>
+
+<!-- ===== v1 (改稿前 / 構造版初稿) ── 参照専用 ===== -->
+<div id="content-v1" contenteditable="false" style="display:none;">
+
+<span class="v1-banner">📖 これは肉声反映<strong>前</strong>の構造版初稿(参照専用)です。録音は可能ですが、「Claude Code へ送る」は常に v2 を起点として扱います。</span>
+
+<p>編成会議という場がある。</p>
+
+<p>縦に視聴率帯、横にターゲット属性、奥行きに尺とCM枠。この三次元の連立方程式を、毎週ホワイトボードの前で解いていた。Aターゲット(男女13-49)を何時に何分掴むか。F1とF2の重なりをどこで切るか。深夜は誰のための器か。あの会議室で起きていたことが、いまYouTubeの中で再演されている。</p>
+
+<p>そう感じたのは、Streaming Media Year-in-Review 2026(取得日:2026-05-23 / 信頼度:高)を読んだときだ。米国では、テレビ画面で見られるYouTubeが、モバイルでのYouTubeを超えた。同時にYouTubeのCEOは「YouTube is the new television」と言い切った(信頼度:高)。</p>
+
+<p>これは「若者がスマホで短い動画を見ている」という、よくある物語の続編ではない。35〜64歳が、テレビのリモコンでYouTubeを立ち上げ、リビングのソファに沈み込んでいる。ここから先は、編成の話だ。</p>
+
+<h2>1. 何が起きたか ── 米の事実と、日本の兆候</h2>
+
+<p>事実を順番に置く。</p>
+
+<ul>
+<li>米国のTV画面におけるYouTube視聴時間が、モバイル視聴を超えた(2026 / 出典:Streaming Media Year-in-Review 2026 / 信頼度:高)</li>
+<li>米国のインターネットユーザーの85%が、月1回以上YouTubeを見ている(同 / 信頼度:高)</li>
+<li>35〜64歳が "golden age of film and TV" のYouTube視聴を牽引している(同 / 信頼度:高)</li>
+<li>SVOD全体の成長率は2026年に約5%、2030年には2%を割る見通し(同 / 信頼度:中)</li>
+<li>アニメ視聴では、調査対象9カ国のうち日本だけがYouTubeを首位に据えている(同 / 信頼度:中)</li>
+</ul>
+
+<p>ここで「アメリカは特殊だから」と言いたくなる。が、それは構造を見ていない。日本でも、スマートTVの出荷比率は高止まりし、HDMI 1番にYouTubeアプリが並ぶ家庭は珍しくない。リビング動線で「テレビをつける = YouTubeを開く」という置き換えが、静かに進んでいる(推定 / 要検証)。</p>
+
+<div class="data-note"><strong>【日本市場との適合度評価】</strong> 米国の構図がそのまま再現される確度:中。ただし「TV画面でYouTubeを見る35〜64歳」というセグメントは、日本では地上波視聴の慣性が強く、置換ではなく "並走" になる可能性が高い。結論:「日本では、YouTubeはテレビの代替ではなく、テレビの一画面として共存する」と置いて編成を組むのが筋がいい。</div>
+
+<h2>2. なぜ35〜64歳が黄金層なのか ── 可処分所得 × 可処分時間 の交点</h2>
+
+<p>メディアの収益は、視聴者の頭数ではなく、視聴者の財布で決まる。広告主が買っているのは「届く人数」ではなく「届いた先で動く金額」だ。ここを取り違えると、編成は永遠に若者を追って疲弊する。</p>
+
+<p>35〜64歳は、可処分所得と可処分時間の積が最大になる帯だ。住宅ローンが終わりに近づき、子の手が離れ、健康投資・趣味・学び直し・旅行・資産運用に予算が動く。広告主にとって、これほど都合のいい層はない。CPM(千回表示あたり広告単価)は、若年向けインフィード広告より、シニア向け健康・金融・旅行のほうがしばしば2〜3倍高い(推定 / 業界実勢 / 信頼度:中)。</p>
+
+<p>つまり、YouTubeの35〜64歳は、編成的に言えば「ゴールデン」だ。夜7時から11時の地上波で取りに行っていた、あの層が、リビングの同じソファでYouTubeを見ている。取りに行かない理由がない。</p>
+
+<h2>3. 地上波編成ロジックをYouTubeに転写する3つのフォーマット</h2>
+
+<p>ここからが本題だ。編成の三種の神器 ── 帯・特番・深夜枠 ── をそのままYouTubeに転写する。器が変わっただけで、視聴行動の本質は変わっていない。</p>
+
+<h3>フォーマット① 帯番組型(週次 × 固定時間 × 固定MC)</h3>
+
+<p>地上波の朝の情報番組、夕方のニュース、平日深夜のバラエティ。これらが視聴習慣として強いのは「同じ時間・同じ顔・同じ枠」で記憶に刻まれるからだ。</p>
+
+<p>YouTubeでも同じことができる。週1〜2回、決まった曜日の決まった時間に、決まったMCが出る。動画長は15〜25分。冒頭フォーマット、コーナー構成、エンディングを固定する。チャンネル登録者の「予測可能性」を上げると、通知ON率と初動再生が跳ねる。</p>
+
+<ul>
+<li>想定CPM:¥800〜¥1,500(日本/35〜64歳/長尺ミッドロール想定 / 推定 / 信頼度:中)</li>
+<li>想定ROIC:制作費30〜50万円/本、年間60本、広告+案件で粗利率35〜45%を狙う規模感(推定 / 要検証)</li>
+</ul>
+
+<p>地上波1番組の予算感とは桁が違う。だからこそ、ROICで見ると勝てる構造になりうる。</p>
+
+<h3>フォーマット② 特番型(イベント連動の高密度尺)</h3>
+
+<p>選挙、スポーツ国際大会、決算シーズン、大型新商品発表、地域の祭礼。地上波の「特番」は、視聴者の関心が集中する瞬間に、高密度で尺を取る装置だ。</p>
+
+<p>YouTubeの特番は、生配信 + 編集アーカイブの二段構えで効く。当日:2〜4時間の生配信で同時接続を稼ぎ、スーパーチャットと案件タイアップを取る。翌週以降:30分×3〜5本に再編集してロングテールを取る。帯番組のチャンネル登録者を母集団として動員すれば、初動が安定する。</p>
+
+<ul>
+<li>想定CPM:¥1,200〜¥2,500(イベント連動の希少性プレミアム / 推定 / 信頼度:中)</li>
+<li>想定ROIC:1イベントで制作費の1.5〜3倍回収を狙う(推定 / 要検証)</li>
+</ul>
+
+<h3>フォーマット③ 深夜枠的尖り(ニッチ深掘り × ロイヤリティ醸成)</h3>
+
+<p>地上波の深夜は、視聴率は低いがロイヤリティが高い。熱量の濃い1万人は、薄い100万人より、広告主と物販に強い。</p>
+
+<p>YouTubeのニッチチャンネルは、まさに深夜枠の構造だ。登録者1〜5万人でも、視聴完了率が高く、コメント欄が機能していれば、メンバーシップ・物販・有料コミュニティでUnit Economicsが成立する。CAC Cashback(1人あたり獲得コストの回収期間)を6〜9ヶ月に収められれば、規模は小さくても自立する。</p>
+
+<ul>
+<li>想定CPM:広告依存度を下げ、メンバーシップARPU ¥500〜¥1,500/月で組む(推定 / 信頼度:中)</li>
+<li>想定ROIC:広告フォーマットより不安定だが、当たれば粗利率50%超(推定 / 要検証)</li>
+</ul>
+
+<p>地上波の「深夜は実験場」という思想を、YouTubeで本気で運用するチームは、まだ日本に多くない。</p>
+
+<h2>4. 日本の中小・地方局が今週から取れる1手</h2>
+
+<p>ここまでの構造を踏まえて、地方局・中小制作会社・地方発の中小企業が、今週から動ける手を一つだけ書く。</p>
+
+<p><strong>「自社の眠っているアーカイブ素材 × 35〜64歳のニーズ × 帯番組型(フォーマット①)」を、まず1本だけ走らせる。</strong></p>
+
+<p>地方局には、過去10〜30年分の地域映像アーカイブがある。祭、職人、農産物、地場産業、地元の人物、町並みの変遷。これらは、地方の50代以上にとっては「自分の人生の風景」であり、首都圏や海外の35〜64歳にとっては「日本のローカル資源」だ。</p>
+
+<p>週1本、20分、固定MC、固定構成。1クール(12本)走らせて、CPM・登録者増・コメント熱量の3指標で意思決定する。撮り下ろしを最小化し、アーカイブの再編集中心にすれば、1本あたりの制作費は10〜20万円に収まる(推定 / 要検証)。</p>
+
+<p>そして、ここが「日本の良さを海外に経済価値として還流させる」入り口になる。英語字幕(自動 + 軽い人手校正)をつけて、海外の日本好き35〜64歳に届ける。広告CPMは、海外視聴のほうが日本国内より1.5〜2倍高い帯がある(推定 / 業界実勢 / 信頼度:中)。地方資源を、ローカルで磨き、グローバルで換金する。編成発想とROICを両輪で回せば、地方局は "縮む産業" ではなく "走り直せる産業" になる。</p>
+
+<h2>結び</h2>
+
+<p>YouTubeは新しいテレビではない。テレビという機能が、YouTubeという器に乗り換えただけだ。編成という技術は、まだ死んでいない。むしろ、これからの10年で最も希少な技術になる。</p>
+
+<p>リビングのソファで、35〜64歳がリモコンを握っている。そのリモコンの先に、地上波とYouTubeが並んで並走している。編成を知っている人間が、いま動けば、間に合う。</p>
+
+</div>
+
+</main>
+
+<footer>
+  Web Speech API 対応ブラウザ:Chrome / Edge。textarea の内容は <code>localStorage:aico_voice_memo_W21_3</code> に自動保存(F5可)。<br>
+  録音単位は自由 — 思いついたタイミングで何度でも。停止すると <code>[HH:MM:SS] 発話</code> の形で追記されます。
+</footer>
+
+</section><!-- /phase-2 -->
+
+<!-- ===== Phase 3: distributor 変換(本タスクの中心) ===== -->
+<section id="phase-3" class="phase">
+  <div class="phase-wrap">
+    <h2 class="phase-title">③ distributor 変換</h2>
+    <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開(AIco言語ポリシー v1.6 準拠)。<br>※ v1.0 は変換ロジック未実装 — ボタンで各媒体の枠とガイドを生成し、城田が手動で貼り付け・編集します。実変換は別タスク(claude.ai の Claude に生成依頼)。</p>
+
+    <div class="source-box" id="dist-source">
+      <span class="src-label">入力(note 正本 / Phase 2 v2 本文)</span>
+      <span id="dist-source-text">(Phase 2 の本文を読み込みます…)</span>
+    </div>
+
+    <div class="action-row">
+      <button type="button" class="convert-btn" id="convert-btn">⚡ 6媒体に変換(枠を生成)</button>
+      <button type="button" class="prompt-btn" id="dist-prompt-btn">📋 Claudeに変換依頼プロンプトをコピー</button>
+    </div>
+
+    <div class="media-tabs" id="media-tabs"></div>
+    <div id="media-panels"></div>
+  </div>
+</section>
+
+<!-- ===== Phase 4: verifier 8項目チェック ===== -->
+<section id="phase-4" class="phase">
+  <div class="phase-wrap">
+    <h2 class="phase-title">④ verifier 8項目チェック</h2>
+    <p class="phase-sub">配信前ゲート。8項目すべてにチェックが入ると「配信準備完了」ステータスに変わります。</p>
+    <ul class="verify-list" id="verify-list"></ul>
+    <div class="verify-status" id="verify-status">未完了 <span class="vs-count">0 / 8 項目</span></div>
+  </div>
+</section>
+
+<!-- ===== Phase 5: 配信状態 + commit履歴(将来 / 骨組みのみ) ===== -->
+<section id="phase-5" class="phase">
+  <div class="phase-wrap">
+    <h2 class="phase-title">⑤ 配信状態 + commit履歴</h2>
+    <p class="phase-sub">城田承認後の一斉配信状態を手動管理するフェーズ。<strong>状態表は機能版(localStorage保存) / commit履歴は将来実装。</strong></p>
+    <div class="func-card">
+      <p class="func-hint">各媒体の<b>状態</b>(未配信 / 下書き済 / 配信済)・<b>投稿予定時刻</b>・<b>URL</b> を記録します。状態や予定を変えると更新時刻が自動で記録され、すべてブラウザに自動保存されます(自動投稿はしません — 公開直前の手動管理画面)。</p>
+      <table class="dist-table">
+        <thead><tr><th>媒体</th><th style="width:84px;">状態</th><th style="width:160px;">投稿予定時刻</th><th>URL</th><th style="width:74px;">更新</th></tr></thead>
+        <tbody id="dist-status-body"></tbody>
+      </table>
+    </div>
+    <div class="skeleton-card">
+      <span class="skeleton-badge">骨組み / 将来実装</span>
+      <div>commit 履歴(将来 git log 連携):</div>
+      <ul>
+        <li>verifier 合格 → <code>published/</code> 保存 commit</li>
+        <li>配信ログ → knowledge-architect(tashigogo-knowledge)commit</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Sticky control bar -->
+<div class="control-bar">
+  <div class="control-inner">
+    <div class="control-row1">
+      <button type="button" id="mic-btn" class="mic-btn"><span id="mic-icon">🎤</span><span id="mic-label">録音開始</span></button>
+      <div class="status" id="status">待機</div>
+      <button type="button" id="clear-btn" class="clear-btn">🗑️ クリア</button>
+      <button type="button" id="export-btn" class="export-btn"><span class="lbl-full">✍️ 手書き反映を書き出す</span><span class="lbl-short">✍️ 反映</span></button>
+      <button type="button" id="send-btn" class="send-btn"><span class="lbl-full">Claude Code へ送る →</span><span class="lbl-short">送る →</span></button>
+    </div>
+    <textarea id="memo" class="memo-area" placeholder="🎤 を押して話す or ここに直接入力。録音停止のたびに [HH:MM:SS] 発話 の形で追記。手で編集してOK(誤変換修正、不要箇所削除)。"></textarea>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  const WEEK = '2026-W21';
+  const ARTICLE_ID = 3;
+  // 記事ID連動キーの基底: 記事が変わればここだけ差し替える(従来 W21_3 固定問題の解消)
+  const ARTICLE_KEY = 'W21_3';
+  function lsKey(name){ return 'aico_' + name + '_' + ARTICLE_KEY; }
+  const LS_KEY = lsKey('voice_memo');      // = aico_voice_memo_W21_3(既存データ互換)
+  const EDIT_KEY = lsKey('edited_body');   // = aico_edited_body_W21_3(既存データ互換)
+  const DIST_KEY = lsKey('dist_outputs');  // Phase3: 6媒体出力
+  const VERIFY_KEY = lsKey('verify_state');// Phase4: 8項目チェック
+  const PHASE_KEY = lsKey('active_phase'); // アクティブフェーズ
+  const DIST_STATE_KEY = lsKey('dist_state'); // Phase5: 配信状態(状態/URL/更新時刻)
+
+  const memoEl = document.getElementById('memo');
+  const micBtn = document.getElementById('mic-btn');
+  const micLabel = document.getElementById('mic-label');
+  const micIcon = document.getElementById('mic-icon');
+  const statusEl = document.getElementById('status');
+  const sendBtn = document.getElementById('send-btn');
+
+  // ---- Restore from localStorage ----
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) memoEl.value = saved;
+  memoEl.addEventListener('input', function(){
+    localStorage.setItem(LS_KEY, memoEl.value);
+  });
+
+  // ---- Web Speech API ----
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('browser-warning').style.display = 'block';
+    micBtn.disabled = true;
+    micBtn.title = 'このブラウザは Web Speech API 未対応';
+  }
+
+  let recognition = null;
+  let isRecording = false;
+  let collectedFinal = '';
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function nowStamp() {
+    const d = new Date();
+    return '[' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()) + ']';
+  }
+
+  function appendUtterance(text) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const stamp = nowStamp();
+    const sep = memoEl.value && !memoEl.value.endsWith('\n\n')
+      ? (memoEl.value.endsWith('\n') ? '\n' : '\n\n')
+      : '';
+    memoEl.value += sep + stamp + ' ' + trimmed + '\n\n';
+    localStorage.setItem(LS_KEY, memoEl.value);
+    memoEl.scrollTop = memoEl.scrollHeight;
+  }
+
+  function setRecordingUI(on) {
+    isRecording = on;
+    if (on) {
+      micBtn.classList.add('recording');
+      micIcon.textContent = '⏹';
+      micLabel.textContent = '停止';
+      statusEl.textContent = '● 録音中...(話し終わったら停止)';
+      statusEl.classList.add('is-recording');
+    } else {
+      micBtn.classList.remove('recording');
+      micIcon.textContent = '🎤';
+      micLabel.textContent = '録音開始';
+      statusEl.textContent = '待機';
+      statusEl.classList.remove('is-recording');
+    }
+  }
+
+  function startRecording() {
+    if (!SR) return;
+    collectedFinal = '';
+    recognition = new SR();
+    recognition.lang = 'ja-JP';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function(){
+      setRecordingUI(true);
+    };
+    recognition.onresult = function(e){
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) collectedFinal += e.results[i][0].transcript;
+      }
+    };
+    recognition.onerror = function(e){
+      statusEl.textContent = 'エラー: ' + e.error;
+      showToast('音声認識エラー: ' + e.error + '\n(下のテキスト欄に直接入力可)', 'error');
+    };
+    recognition.onend = function(){
+      if (collectedFinal) appendUtterance(collectedFinal);
+      setRecordingUI(false);
+      recognition = null;
+    };
+
+    try {
+      recognition.start();
+    } catch(err) {
+      showToast('録音開始失敗: ' + err.message, 'error');
+      setRecordingUI(false);
+      recognition = null;
+    }
+  }
+
+  function stopRecording() {
+    if (recognition) {
+      try { recognition.stop(); } catch(e) { /* noop */ }
+    }
+  }
+
+  micBtn.addEventListener('click', function(){
+    if (isRecording) stopRecording();
+    else startRecording();
+  });
+
+  // ---- Toast ----
+  function showToast(msg, kind, durationMs) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show' + (kind ? ' ' + kind : '');
+    const ms = durationMs || (kind === 'error' ? 5000 : 2000);
+    setTimeout(function(){ el.className = 'toast' + (kind ? ' ' + kind : ''); }, ms);
+  }
+
+  // ---- Send to Claude Code (clipboard) ----
+  const PROMPT_TEMPLATE_HEAD =
+'肉声吹き込み完了。editor 改稿を起動してほしい。\n' +
+'\n' +
+'【対象記事】\n' +
+'article_3(2026-W21 #3「YouTubeがテレビになった日」)\n' +
+'現状ドラフトのパス(最新・基底):\n' +
+'07_コンテンツ/note原稿/article_3_v2.md\n' +
+'※ プレビューで v1(改稿前)を表示中でも、改稿は常に v2 を起点とする。v1 は参照専用。\n' +
+'\n' +
+'【editor 改稿の作法】\n' +
+'- AIco brand guardrails 厳守\n' +
+'  * no title/role hints\n' +
+'  * no company-identifying info\n' +
+'  * AI言語比率 ≤ 30%\n' +
+'- 「raw beats polished」原則で肉声感を残す\n' +
+'- 肉声内の「~してください」「確認してください」等の指示語は本文に反映せず、内容(主張・観点)のみ溶け込ませる\n' +
+'- 未検証の事実主張は「要検証」ラベルで扱い、確証なければ本文に入れない\n' +
+'- 配置は editor 判断(本文文脈に最も自然な箇所に挿入)\n' +
+'\n' +
+'【城田の肉声メモ(時系列順)】\n';
+
+  const PROMPT_TEMPLATE_TAIL =
+'\n' +
+'【出力】\n' +
+'1. article_3_v3.md(改稿版、本文のみ ── v2を上書きせず次版として保存)\n' +
+'2. 改稿サマリー(各肉声をどこに溶け込ませたか3〜5行)\n' +
+'3. AI言語比率の概算値\n' +
+'4. preview HTML 再生成(同じパス、マイクUI v2 仕様)\n' +
+'\n' +
+'完了したらフルパスと改稿サマリーを返してほしい。\n';
+
+  sendBtn.addEventListener('click', async function(){
+    const memo = memoEl.value.trim();
+    if (!memo) {
+      showToast('肉声が空です。録音 or 直接入力してから送ってください。', 'warn', 3000);
+      return;
+    }
+
+    const prompt = PROMPT_TEMPLATE_HEAD + memo + PROMPT_TEMPLATE_TAIL;
+
+    try {
+      await navigator.clipboard.writeText(prompt);
+      showToast('✓ コピーしました\nClaude Code に Ctrl+V → Enter', null, 2000);
+    } catch(e) {
+      console.warn('Clipboard write failed:', e);
+      console.log('=== Paste this into Claude Code ===\n' + prompt);
+      showToast('⚠ クリップボード書き込み失敗。\nコンソールに出力したプロンプトを手動コピーしてください。', 'error', 5000);
+    }
+  });
+
+  // ---- 追加機能①: 録音メモのクリア ----
+  const clearBtn = document.getElementById('clear-btn');
+  clearBtn.addEventListener('click', function(){
+    if (!memoEl.value.trim()) {
+      showToast('録音メモは空です。', 'warn', 2000);
+      return;
+    }
+    if (confirm('録音メモをすべて削除します。よろしいですか?')) {
+      memoEl.value = '';
+      localStorage.removeItem(LS_KEY);
+      showToast('🗑️ 録音メモを削除しました。', null, 2000);
+    }
+  });
+
+  // ---- 追加機能②: v1(改稿前) / v2(改稿後) バージョン切替 ----
+  const btnV1 = document.getElementById('btn-v1');
+  const btnV2 = document.getElementById('btn-v2');
+  const contentV1 = document.getElementById('content-v1');
+  const contentV2 = document.getElementById('content-v2');
+  const verLabel = document.getElementById('ver-label');
+
+  function setVersion(v){
+    const isV1 = (v === 'v1');
+    contentV1.style.display = isV1 ? '' : 'none';
+    contentV2.style.display = isV1 ? 'none' : '';
+    btnV1.classList.toggle('active', isV1);
+    btnV2.classList.toggle('active', !isV1);
+    verLabel.textContent = isV1 ? '改稿前ドラフト(参照専用)' : '改稿v2(肉声反映済)';
+    document.title = isV1
+      ? 'W21 #3 v1(改稿前) / マイクUI v2'
+      : 'W21 #3 v2(改稿後) / マイクUI v2 — 自由録音方式';
+    // 手書き修正モードの連動: v2 のみ編集可、v1 は参照専用
+    contentV2.setAttribute('contenteditable', isV1 ? 'false' : 'true');
+    contentV1.setAttribute('contenteditable', 'false');
+    if (isV1) clearEditingMark();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  btnV1.addEventListener('click', function(){ setVersion('v1'); });
+  btnV2.addEventListener('click', function(){ setVersion('v2'); });
+
+  // ---- 追加機能③: 手書き修正モード(contenteditable) ----
+  const exportBtn = document.getElementById('export-btn');
+  const saveIndicator = document.getElementById('save-indicator');
+  const restoreBanner = document.getElementById('restore-banner');
+
+  // (a) F5 復元: 前回の手書き編集があれば本文へ反映し、バナーを3秒表示
+  const savedBody = localStorage.getItem(EDIT_KEY);
+  if (savedBody && savedBody.trim()) {
+    contentV2.innerHTML = savedBody;
+    restoreBanner.classList.add('show');
+    setTimeout(function(){ restoreBanner.classList.remove('show'); }, 3000);
+  }
+
+  // (b) フォーカス中の段落に左縦線(.editing)
+  function clearEditingMark() {
+    contentV2.querySelectorAll('p.editing').forEach(function(p){ p.classList.remove('editing'); });
+  }
+  function markEditingParagraph() {
+    if (contentV2.getAttribute('contenteditable') !== 'true') return;
+    clearEditingMark();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    let node = sel.anchorNode;
+    while (node && node !== contentV2) {
+      if (node.nodeType === 1 && node.tagName === 'P') { node.classList.add('editing'); break; }
+      node = node.parentNode;
+    }
+  }
+  document.addEventListener('selectionchange', markEditingParagraph);
+  contentV2.addEventListener('focusout', function(){ setTimeout(clearEditingMark, 0); });
+
+  // (c) Enter は <br>(<div> ラップ禁止) / リッチ貼り付けは強制プレーンテキスト化
+  contentV2.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.execCommand('insertLineBreak');
+    }
+  });
+  contentV2.addEventListener('paste', function(e){
+    e.preventDefault();
+    const cd = e.clipboardData || window.clipboardData;
+    const text = cd ? cd.getData('text/plain') : '';
+    if (text) document.execCommand('insertText', false, text);
+  });
+
+  // (d) 自動保存(入力停止後 1.5秒デバウンス)+ インジケータ
+  let saveTimer = null;
+  function showSaved() {
+    saveIndicator.textContent = '💾 自動保存済み ' + nowStamp().replace(/[\[\]]/g, '');
+    saveIndicator.classList.add('show');
+  }
+  function saveEditedBody() {
+    const clone = contentV2.cloneNode(true);
+    clone.querySelectorAll('p.editing').forEach(function(p){ p.classList.remove('editing'); });
+    localStorage.setItem(EDIT_KEY, clone.innerHTML);
+    showSaved();
+  }
+  contentV2.addEventListener('input', function(){
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveEditedBody, 1500);
+  });
+
+  // (e) ✍️ 手書き反映を書き出す → verifier ゲート起動プロンプトをクリップボードへ
+  const EXPORT_HEAD =
+'手書き修正完了。verifier 配信前ゲートを起動してほしい。\n' +
+'\n' +
+'【対象】article_3 / 2026-W21 #3(手書き反映済・確定候補)\n' +
+'【作法】AI言語率≦30% / ブランド表記 / AIco名下肩書漏れ\n' +
+' をチェックし、合格なら published/ に確定保存。\n' +
+'\n' +
+'--- 確定候補本文(手書き反映済) ---\n';
+  const EXPORT_TAIL =
+'\n--- ここまで ---\n' +
+'\n' +
+'完了したら判定結果と保存パスを返してほしい。\n';
+
+  exportBtn.addEventListener('click', async function(){
+    const title = (document.querySelector('header.meta h1').textContent || '').trim();
+    const bodyText = contentV2.innerText.replace(/\n{3,}/g, '\n\n').trim();
+    if (!bodyText) {
+      showToast('本文が空です。', 'warn', 3000);
+      return;
+    }
+    if (!confirm('現在の手書き修正を確定版として書き出します。よろしいですか?')) return;
+
+    // 書き出し時点の編集を確実に保存
+    saveEditedBody();
+
+    const payload = EXPORT_HEAD + title + '\n\n' + bodyText + EXPORT_TAIL;
+    try {
+      await navigator.clipboard.writeText(payload);
+      showToast('✍️ 確定候補をコピーしました\nClaude Code に Ctrl+V → Enter(verifier ゲート)', null, 2600);
+    } catch(e) {
+      console.warn('Clipboard write failed:', e);
+      console.log('=== Paste this into Claude Code ===\n' + payload);
+      showToast('⚠ クリップボード書き込み失敗。\nコンソールのテキストを手動コピーしてください。', 'error', 5000);
+    }
+  });
+
+  // ============================================================
+  // ===== 5-Phase dashboard extension (v3) =====
+  // ============================================================
+
+  // ---- 6媒体仕様(AIco言語ポリシー v1.6 + distributor 仕様) ----
+  const MEDIA = [
+    { id:'note_jp',            label:'note (JP本館)',      limit:5000, hint:'日本語・長文 2000〜5000字。タイトル+冒頭3行+見出し3〜5段+締めの問い。これが正本。' },
+    { id:'substack_en',        label:'Substack (EN本館)',  limit:6000, hint:'英語・並列生成(翻訳ではない)。note と 70%共通 + 30%英語圏独自。' },
+    { id:'medium_en',          label:'Medium (EN拡張)',    limit:3000, hint:'英語・Substack の 40-50%圧縮版。SEO発見窓口。1週間後配信。' },
+    { id:'linkedin_en',        label:'LinkedIn (ENハブ)',  limit:1500, hint:'英語・1200〜1500字。冒頭2行で結論先出し。末尾にリンク + ハッシュタグ3〜5。' },
+    { id:'x_thread',           label:'X スレッド (70:30)', limit:1000, hint:'5〜7投稿・各140字以内。1投稿目で結論、最終で note リンク。' },
+    { id:'instagram_carousel', label:'Instagram (70:30)',  limit:2200, hint:'カルーセル10枚以内。1枚目フック / 2-9本論 / 10枚目 note誘導。キャプション200〜400字 + ハッシュタグ5〜10。' }
+  ];
+
+  // ---- Phase switching ----
+  const phaseNavBtns = Array.prototype.slice.call(document.querySelectorAll('.phase-btn'));
+  const phaseSections = {
+    '1': document.getElementById('phase-1'), '2': document.getElementById('phase-2'),
+    '3': document.getElementById('phase-3'), '4': document.getElementById('phase-4'),
+    '5': document.getElementById('phase-5')
+  };
+  const versionToggleEl = document.querySelector('.version-toggle');
+  const controlBarEl = document.querySelector('.control-bar');
+
+  function getSourceNote(){
+    const v2 = document.getElementById('content-v2');
+    return v2 ? v2.innerText.replace(/\n{3,}/g, '\n\n').trim() : '';
+  }
+  function getSourceTitle(){
+    const h1 = document.querySelector('header.meta h1');
+    return h1 ? h1.textContent.trim() : '';
+  }
+  function refreshDistSource(){
+    const el = document.getElementById('dist-source-text');
+    if (!el) return;
+    const src = getSourceNote();
+    el.textContent = src ? (src.length > 400 ? src.slice(0, 400) + ' …' : src) : '(Phase 2 に本文がありません)';
+  }
+
+  function setPhase(n){
+    n = String(n);
+    if (!phaseSections[n]) n = '2';
+    Object.keys(phaseSections).forEach(function(k){
+      phaseSections[k].classList.toggle('phase-active', k === n);
+    });
+    phaseNavBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.phase === n); });
+    const isP2 = (n === '2');
+    if (versionToggleEl) versionToggleEl.style.display = isP2 ? '' : 'none';
+    if (controlBarEl) controlBarEl.style.display = isP2 ? '' : 'none';
+    document.body.classList.toggle('p2', isP2);
+    if (n === '3') refreshDistSource();
+    try { localStorage.setItem(PHASE_KEY, n); } catch(e){}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  phaseNavBtns.forEach(function(b){
+    b.addEventListener('click', function(){ setPhase(b.dataset.phase); });
+  });
+
+  // ---- Phase 3: distributor 変換 ----
+  const mediaTabsEl = document.getElementById('media-tabs');
+  const mediaPanelsEl = document.getElementById('media-panels');
+
+  MEDIA.forEach(function(m, idx){
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'media-tab' + (idx === 0 ? ' active' : '');
+    tab.dataset.media = m.id;
+    tab.innerHTML = m.label + '<span class="filled-dot"></span>';
+    mediaTabsEl.appendChild(tab);
+
+    const panel = document.createElement('div');
+    panel.className = 'media-panel' + (idx === 0 ? ' active' : '');
+    panel.dataset.media = m.id;
+    panel.innerHTML =
+      '<div class="panel-hint">' + m.hint + '</div>' +
+      '<textarea class="media-output" id="out-' + m.id + '" placeholder="ここに「' + m.label + '」向けの変換結果が入ります。&#10;「⚡ 6媒体に変換」でガイド枠を生成 → 手で貼り付け・編集 → 📄コピー。"></textarea>' +
+      '<div class="panel-foot"><span class="char-count" id="cc-' + m.id + '">0 字 / 上限 ' + m.limit + '</span>' +
+      '<button type="button" class="copy-btn" data-copy="' + m.id + '">📄 コピー</button></div>';
+    mediaPanelsEl.appendChild(panel);
+  });
+
+  const mediaTabs = Array.prototype.slice.call(mediaTabsEl.querySelectorAll('.media-tab'));
+  const mediaPanels = Array.prototype.slice.call(mediaPanelsEl.querySelectorAll('.media-panel'));
+  mediaTabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      mediaTabs.forEach(function(x){ x.classList.remove('active'); });
+      mediaPanels.forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      const p = mediaPanelsEl.querySelector('.media-panel[data-media="' + t.dataset.media + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+
+  function updateCharCount(m){
+    const ta = document.getElementById('out-' + m.id);
+    const cc = document.getElementById('cc-' + m.id);
+    const tab = mediaTabsEl.querySelector('.media-tab[data-media="' + m.id + '"]');
+    if (!ta || !cc) return;
+    const n = ta.value.length;
+    cc.textContent = n + ' 字 / 上限 ' + m.limit;
+    cc.classList.toggle('over', n > m.limit);
+    if (tab) tab.classList.toggle('filled', n > 0);
+  }
+  function saveDistOutputs(){
+    const data = {};
+    MEDIA.forEach(function(m){
+      const ta = document.getElementById('out-' + m.id);
+      if (ta) data[m.id] = ta.value;
+    });
+    try { localStorage.setItem(DIST_KEY, JSON.stringify(data)); } catch(e){}
+  }
+  (function restoreDist(){
+    let data = {};
+    try { data = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e){ data = {}; }
+    MEDIA.forEach(function(m){
+      const ta = document.getElementById('out-' + m.id);
+      if (!ta) return;
+      if (data[m.id]) ta.value = data[m.id];
+      ta.addEventListener('input', function(){ updateCharCount(m); saveDistOutputs(); });
+      updateCharCount(m);
+    });
+  })();
+  refreshDistSource();
+
+  document.getElementById('convert-btn').addEventListener('click', function(){
+    const src = getSourceNote();
+    const title = getSourceTitle();
+    if (!src){ showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
+    const filled = MEDIA.filter(function(m){ const ta = document.getElementById('out-' + m.id); return ta && ta.value.trim(); });
+    if (filled.length && !confirm('既存の変換結果(' + filled.length + '媒体)を上書きしてプレースホルダを再生成します。よろしいですか?')) return;
+    MEDIA.forEach(function(m){
+      const ta = document.getElementById('out-' + m.id);
+      if (!ta) return;
+      ta.value =
+        '【' + m.label + ' 向け変換結果プレースホルダ】\n' +
+        '— ' + m.hint + '\n' +
+        '— 上限の目安: ' + m.limit + '字\n\n' +
+        (m.id === 'note_jp'
+          ? ('[タイトル] ' + title + '\n\n' + src)
+          : 'ここに「' + m.label + '」向けの変換結果を貼り付け/編集してください。\n(自動変換は別タスク: 📋ボタンで Claude 用プロンプトを取得 → claude.ai で生成)');
+      updateCharCount(m);
+    });
+    saveDistOutputs();
+    showToast('⚡ 6媒体の枠を生成しました(note_jp は正本を投入済)。', null, 2600);
+  });
+
+  mediaPanelsEl.addEventListener('click', async function(e){
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    const id = btn.dataset.copy;
+    const ta = document.getElementById('out-' + id);
+    if (!ta || !ta.value.trim()){ showToast('この媒体はまだ空です。', 'warn', 2000); return; }
+    try { await navigator.clipboard.writeText(ta.value); showToast('📄 コピーしました(' + id + ')', null, 1800); }
+    catch(err){ console.log(ta.value); showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000); }
+  });
+
+  document.getElementById('dist-prompt-btn').addEventListener('click', async function(){
+    const src = getSourceNote();
+    const title = getSourceTitle();
+    if (!src){ showToast('Phase 2 に本文がありません。', 'warn', 3000); return; }
+    let p = 'distributor フェーズ1(変換)を実行してほしい。note 正本を 6媒体へ展開する。\n\n';
+    p += '【AIco言語ポリシー v1.6 準拠】note JP本館 / Substack EN本館 / Medium EN拡張 / LinkedIn ENハブ / X 70:30 / Instagram 70:30。note と Substack は並列生成(翻訳ではない)、70%共通 + 30%市場別独自。\n\n';
+    p += '【媒体別仕様】\n';
+    MEDIA.forEach(function(m){ p += '- ' + m.label + '(id:' + m.id + ', 上限目安' + m.limit + '字): ' + m.hint + '\n'; });
+    p += '\n【入力 note 正本】\n[タイトル] ' + title + '\n\n' + src + '\n\n';
+    p += '【出力】6媒体それぞれの本文を、媒体id(note_jp / substack_en / medium_en / linkedin_en / x_thread / instagram_carousel)を見出しにして返してほしい。AI言語率≦30% / ブランド guardrails(本名露出なし)厳守。\n';
+    try { await navigator.clipboard.writeText(p); showToast('📋 変換依頼プロンプトをコピー\nclaude.ai に貼り付けて生成 → 結果を各媒体欄へ。', null, 2800); }
+    catch(err){ console.log(p); showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000); }
+  });
+
+  // ---- Phase 4: verifier 8項目 ----
+  const VERIFY_ITEMS = [
+    { id:'ai_lang',    label:'AI言語率 ≤ 30%',                       note:'機械生成感の強い表現の比率' },
+    { id:'char_len',   label:'文字数が媒体規定内',                   note:'6媒体それぞれの上限内' },
+    { id:'title_body', label:'タイトル⇔本文整合',                   note:'見出しと内容の一致' },
+    { id:'sources',    label:'引用元・出典明示',                     note:'取得日 / 信頼度ラベル付き' },
+    { id:'hashtags',   label:'ハッシュタグ整合',                     note:'媒体別の規定数・表記' },
+    { id:'guardrails', label:'ブランド guardrails 遵守(本名露出なし等)', note:'AIco配下で城田の顔・肩書露出なし' },
+    { id:'no_secret',  label:'機密情報なし',                         note:'事業①顧客情報 / TOKYO MX 守秘範囲' },
+    { id:'schedule',   label:'投稿予定日時設定済',                   note:'配信スケジュール確定', datetime:true }
+  ];
+  const verifyListEl = document.getElementById('verify-list');
+  const verifyStatusEl = document.getElementById('verify-status');
+  let verifyState = {};
+  try { verifyState = JSON.parse(localStorage.getItem(VERIFY_KEY) || '{}'); } catch(e){ verifyState = {}; }
+  function saveVerifyState(){ try { localStorage.setItem(VERIFY_KEY, JSON.stringify(verifyState)); } catch(e){} }
+
+  VERIFY_ITEMS.forEach(function(it){
+    const li = document.createElement('li');
+    li.className = 'verify-item';
+    li.innerHTML =
+      '<input type="checkbox" id="vchk-' + it.id + '">' +
+      '<label for="vchk-' + it.id + '">' + it.label + '<span class="vi-note">' + it.note + '</span>' +
+      (it.datetime ? '<input type="datetime-local" class="vi-datetime" id="vdt-' + it.id + '">' : '') +
+      '</label>';
+    verifyListEl.appendChild(li);
+  });
+
+  function refreshVerifyStatus(){
+    let checked = 0;
+    VERIFY_ITEMS.forEach(function(it){
+      const cb = document.getElementById('vchk-' + it.id);
+      const li = cb.closest('.verify-item');
+      if (cb.checked){ checked++; li.classList.add('checked'); } else { li.classList.remove('checked'); }
+    });
+    const ready = (checked === VERIFY_ITEMS.length);
+    verifyStatusEl.classList.toggle('ready', ready);
+    verifyStatusEl.innerHTML = (ready ? '✅ 配信準備完了' : '未完了') + '<span class="vs-count">' + checked + ' / ' + VERIFY_ITEMS.length + ' 項目</span>';
+    const navBtn = document.querySelector('.phase-btn[data-phase="4"]');
+    if (navBtn) navBtn.style.color = ready ? '#2a9d4a' : '';
+  }
+
+  VERIFY_ITEMS.forEach(function(it){
+    const cb = document.getElementById('vchk-' + it.id);
+    if (verifyState[it.id]) cb.checked = true;
+    cb.addEventListener('change', function(){
+      verifyState[it.id] = cb.checked;
+      saveVerifyState();
+      refreshVerifyStatus();
+    });
+    if (it.datetime){
+      const dt = document.getElementById('vdt-' + it.id);
+      if (verifyState[it.id + '_dt']) dt.value = verifyState[it.id + '_dt'];
+      dt.addEventListener('click', function(e){ e.stopPropagation(); });
+      dt.addEventListener('change', function(){
+        verifyState[it.id + '_dt'] = dt.value;
+        if (dt.value){ cb.checked = true; verifyState[it.id] = true; }
+        saveVerifyState();
+        refreshVerifyStatus();
+      });
+    }
+  });
+  refreshVerifyStatus();
+
+  // ---- Phase 5: 配信状態テーブル(機能版 / localStorage保存) ----
+  const DIST_STATES = ['未配信', '下書き済', '配信済'];
+  function distStamp(){
+    const d = new Date();
+    return pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+  function escAttr(s){ return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+  const distStatusBody = document.getElementById('dist-status-body');
+  let distStateData = {};
+  try { distStateData = JSON.parse(localStorage.getItem(DIST_STATE_KEY) || '{}'); } catch(e){ distStateData = {}; }
+  function saveDistState(){ try { localStorage.setItem(DIST_STATE_KEY, JSON.stringify(distStateData)); } catch(e){} }
+
+  if (distStatusBody){
+    MEDIA.forEach(function(m){
+      const st = distStateData[m.id] || {};
+      const tr = document.createElement('tr');
+      tr.dataset.media = m.id;
+      const opts = DIST_STATES.map(function(s){
+        return '<option' + ((st.status || '未配信') === s ? ' selected' : '') + '>' + s + '</option>';
+      }).join('');
+      tr.innerHTML =
+        '<td data-label="媒体">' + m.label + '</td>' +
+        '<td data-label="状態"><select class="dist-status-select" aria-label="' + escAttr(m.label) + ' の配信状態">' + opts + '</select></td>' +
+        '<td data-label="投稿予定時刻"><input class="dist-sched-input" type="datetime-local" aria-label="' + escAttr(m.label) + ' の投稿予定時刻" value="' + escAttr(st.sched || '') + '"></td>' +
+        '<td data-label="URL"><input class="dist-url-input" type="url" placeholder="https://…" value="' + escAttr(st.url || '') + '"></td>' +
+        '<td class="dist-ts" data-label="更新時刻">' + (st.ts || '—') + '</td>';
+      distStatusBody.appendChild(tr);
+
+      const sel = tr.querySelector('.dist-status-select');
+      const schedEl = tr.querySelector('.dist-sched-input');
+      const urlEl = tr.querySelector('.dist-url-input');
+      const tsCell = tr.querySelector('.dist-ts');
+      function applyTint(){
+        tr.classList.toggle('is-draft', sel.value === '下書き済');
+        tr.classList.toggle('is-live', sel.value === '配信済');
+      }
+      applyTint();
+      sel.addEventListener('change', function(){
+        const cur = distStateData[m.id] || {};
+        cur.status = sel.value;
+        cur.ts = distStamp();
+        distStateData[m.id] = cur;
+        tsCell.textContent = cur.ts;
+        applyTint();
+        saveDistState();
+      });
+      urlEl.addEventListener('input', function(){
+        const cur = distStateData[m.id] || {};
+        cur.url = urlEl.value;
+        distStateData[m.id] = cur;
+        saveDistState();
+      });
+      schedEl.addEventListener('change', function(){
+        const cur = distStateData[m.id] || {};
+        cur.sched = schedEl.value;
+        cur.ts = distStamp();
+        distStateData[m.id] = cur;
+        tsCell.textContent = cur.ts;
+        saveDistState();
+      });
+    });
+  }
+
+  // ---- Phase 1: トピック差込口(将来差し替え) ----
+  // 将来 weekly_topics/<WEEK>/topics.html のダイジェストHTMLを取得し、
+  // window.AIcoRenderTopics(htmlString) に渡すだけで #phase1-topics-mount を差し替えられる構成。
+  // file:// では fetch が CORS で失敗するため、当面は手動運用(下記ボタンで手順を案内)。
+  (function initPhase1(){
+    const wk = document.getElementById('p1-week');
+    if (wk) wk.textContent = WEEK;
+    window.AIcoRenderTopics = function(htmlString){
+      const mount = document.getElementById('phase1-topics-mount');
+      if (mount && typeof htmlString === 'string') mount.innerHTML = htmlString;
+    };
+    const hintBtn = document.getElementById('p1-load-hint');
+    if (hintBtn){
+      hintBtn.addEventListener('click', function(){
+        showToast('差し替え手順:\n① weekly_topics/' + WEEK + '/topics.html を生成(aico-weekly-topics)\n② そのダイジェストHTMLを AIcoRenderTopics(html) に渡す\n③ PICK → Phase2 へ。当面は手動運用。', null, 4600);
+      });
+    }
+  })();
+
+  // ---- 初期フェーズ復元(既定は Phase 2 = 既存挙動を温存) ----
+  (function initPhase(){
+    let p = '2';
+    try { const s = localStorage.getItem(PHASE_KEY); if (s && phaseSections[s]) p = s; } catch(e){}
+    setPhase(p);
+  })();
+})();
+</script>
+
+</body>
+</html>
