@@ -1107,6 +1107,120 @@
     .p4-user-action { flex-direction: column; }
     .p4-back-btn, .p4-complete-btn { width: 100%; }
   }
+
+  /* ---- Phase 3: GOモードバナー ---- */
+  .p3-go-banner {
+    border-radius: 9px; margin-bottom: 14px; display: none;
+  }
+  .p3-go-banner.go-full, .p3-go-banner.go-partial {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .p3-go-banner.go-full    { background: #e8f5ec; border: 2px solid #2a9d4a; }
+  .p3-go-banner.go-partial { background: #fff8e1; border: 1.5px solid #f0a500; }
+  .go-label { font-size: 15px; font-weight: 800; white-space: nowrap;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .go-text  { font-size: 13.5px; color: #1e7a37; flex: 1;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .p3-go-banner.go-partial .go-text { color: #8a6200; }
+  .go-nav-btn {
+    background: #2a9d4a; color: #fff; border: none; border-radius: 7px;
+    padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s;
+  }
+  .go-nav-btn:hover { background: #1e7a37; }
+
+  /* ---- Phase 3 card: 3ボタンレイアウト ---- */
+  .card-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .card-copy-btn {
+    height: 32px; padding: 0 9px; font-size: 11.5px; font-weight: 600;
+    border: 1.5px solid #c0392b; border-radius: 6px; background: #fff;
+    color: #c0392b; cursor: pointer; white-space: nowrap;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s, color .15s;
+  }
+  .card-copy-btn:hover:not(:disabled) { background: #c0392b; color: #fff; }
+  .card-copy-btn:disabled { border-color: #ccc; color: #ccc; cursor: default; }
+
+  /* ---- Phase 5: 手動投稿チェックリスト ---- */
+  .p5-checklist-wrap {
+    background: #fff; border: 1.5px solid #e8e6e0; border-radius: 10px;
+    padding: 18px; margin-bottom: 16px;
+  }
+  .p5-checklist-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
+  }
+  .p5-checklist-title {
+    font-size: 14px; font-weight: 700; color: #333;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p5-checklist-progress {
+    font-size: 13px; font-weight: 600; color: #888;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p5-checklist-progress.all-done { color: #1e7a37; }
+  .p5-checklist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .p5-checklist-card {
+    border: 1.5px solid #e8e6e0; border-radius: 10px; padding: 14px;
+    background: #fff; display: flex; flex-direction: column; gap: 8px;
+    transition: border-color .15s, background .15s;
+  }
+  .p5-checklist-card.p5-checked   { border-color: #2a9d4a; background: #f8fdf9; }
+  .p5-checklist-card.p5-published { border-color: #1a6b35; opacity: 0.78; }
+  .p5-card-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .p5-card-name {
+    font-size: 14px; font-weight: 700; color: #1a1a1a;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p5-check-row {
+    display: flex; align-items: center; gap: 6px; margin-left: auto;
+    font-size: 12px; color: #555; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p5-check-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: #2a9d4a; cursor: pointer; }
+  .p5-card-preview {
+    font-size: 12px; color: #555; line-height: 1.5; word-break: break-all;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  }
+  .p5-card-preview.empty { color: #aaa; font-style: italic; }
+  .p5-copy-btn {
+    width: 100%; background: #c0392b; color: #fff; border: none; border-radius: 7px;
+    padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s;
+  }
+  .p5-copy-btn:hover { background: #a03020; }
+  .p5-field-label {
+    font-size: 11.5px; font-weight: 700; color: #888; letter-spacing: 0.04em;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .p5-memo-area {
+    width: 100%; font-size: 12.5px; border: 1px solid #d0cdc5; border-radius: 6px;
+    padding: 8px 10px; resize: vertical; min-height: 54px; line-height: 1.5;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    background: #fafaf7; color: #1a1a1a;
+  }
+  .p5-memo-area:focus { outline: none; border-color: #2a9d4a; }
+  .p5-url-input {
+    width: 100%; font-size: 12.5px; border: 1px solid #d0cdc5; border-radius: 6px;
+    padding: 7px 10px; font-family: ui-monospace, Menlo, Consolas, monospace;
+    background: #fff; color: #1a1a1a;
+  }
+  .p5-url-input:focus { outline: none; border-color: #2a9d4a; }
+  .p5-pub-btn {
+    width: 100%; background: #1a6b35; color: #fff; border: none; border-radius: 7px;
+    padding: 9px 14px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s;
+  }
+  .p5-pub-btn:hover:not(.is-published) { background: #155a2c; }
+  .p5-pub-btn.is-published { background: #888; cursor: default; font-size: 12px; }
+
+  @media (max-width: 768px) { .p5-checklist-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) {
+    .card-copy-btn { font-size: 11px; height: 28px; }
+    .p5-copy-btn { font-size: 14px; padding: 12px 14px; }
+  }
 </style>
 </head>
 <body class="p2">
@@ -1306,6 +1420,7 @@
     <h2 class="phase-title">③ distributor ダッシュボード</h2>
     <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開・比較・発信管理(編集OS)。変換は「⚡」ボタンで枠生成 → Claude に貼り付け依頼 → 各欄へペースト → 発信準備OK に進める。</p>
 
+    <div class="p3-go-banner" id="p3-go-banner"></div>
     <div class="p3-warning" id="p3-warning"></div>
 
     <div class="p3-progress-wrap" id="p3-progress-wrap">
@@ -1403,11 +1518,22 @@
   </div>
 </section>
 
-<!-- ===== Phase 5: 配信状態 + commit履歴(将来 / 骨組みのみ) ===== -->
+<!-- ===== Phase 5: 手動投稿・配信管理 ===== -->
 <section id="phase-5" class="phase">
   <div class="phase-wrap">
-    <h2 class="phase-title">⑤ 配信状態 + commit履歴</h2>
-    <p class="phase-sub">城田承認後の一斉配信状態を手動管理するフェーズ。<strong>状態表は機能版(localStorage保存) / commit履歴は将来実装。</strong></p>
+    <h2 class="phase-title">⑤ 手動投稿・配信管理</h2>
+    <p class="phase-sub">各媒体の本文をコピーして手動投稿するフェーズ。投稿URL・確認チェックを記録します（自動投稿はしません）。</p>
+
+    <!-- 手動投稿チェックリスト -->
+    <div class="p5-checklist-wrap">
+      <div class="p5-checklist-header">
+        <span class="p5-checklist-title">手動投稿チェックリスト</span>
+        <span id="p5-checklist-progress" class="p5-checklist-progress">0 / 6 媒体 投稿済み確認</span>
+      </div>
+      <div id="p5-checklist-grid" class="p5-checklist-grid"></div>
+    </div>
+
+    <!-- 配信状態テーブル(既存) -->
     <div class="func-card">
       <p class="func-hint">各媒体の<b>状態</b>(未配信 / 下書き済 / 配信済)・<b>投稿予定時刻</b>・<b>URL</b> を記録します。状態や予定を変えると更新時刻が自動で記録され、すべてブラウザに自動保存されます(自動投稿はしません — 公開直前の手動管理画面)。</p>
       <table class="dist-table">
@@ -1882,6 +2008,7 @@
     if (controlBarEl) controlBarEl.style.display = isP2 ? '' : 'none';
     document.body.classList.toggle('p2', isP2);
     if (n === '3') refreshDistSource();
+    if (n === '5') buildP5Checklist();
     try { localStorage.setItem(PHASE_KEY, n); } catch(e){}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1956,10 +2083,21 @@
     });
     MEDIA.forEach(function(m) { updateCard(m.id); });
     // event delegation — one listener for the whole grid
-    gridEl.addEventListener('click', function(e) {
+    gridEl.addEventListener('click', async function(e) {
       var editBtn = e.target.closest('.card-edit-btn');
+      var copyBtn = e.target.closest('.card-copy-btn');
       var pubBtn  = e.target.closest('.card-pub-btn');
       if (editBtn) { openEditor(editBtn.dataset.media); return; }
+      if (copyBtn && !copyBtn.disabled) {
+        var mid = copyBtn.dataset.media;
+        var txt = distData[mid] ? distData[mid].text : '';
+        if (!txt.trim()) { showToast('この媒体はまだ空です。', 'warn', 2000); return; }
+        try {
+          await navigator.clipboard.writeText(txt);
+          showToast('📄 コピーしました。コピーして手動投稿してください。', null, 2200);
+        } catch(err) { showToast('⚠ コピー失敗。', 'error', 3000); }
+        return;
+      }
       if (pubBtn && !pubBtn.classList.contains('is-published')) {
         publishMedia(pubBtn.dataset.media);
       }
@@ -1997,6 +2135,8 @@
       '</div>' +
       '<div class="card-actions">' +
         '<button type="button" class="card-edit-btn" data-media="' + mediaId + '">✏️ 編集</button>' +
+        '<button type="button" class="card-copy-btn" data-media="' + mediaId + '"' +
+          (isEmpty ? ' disabled title="本文が空です"' : ' title="コピーして手動投稿"') + '>📄 コピー</button>' +
         '<button type="button" class="card-pub-btn' + (d.status === 'published' ? ' is-published' : '') +
           '" data-media="' + mediaId + '">' +
           (d.status === 'published' ? '★ 発信済み' : '📤 発信済みにする') +
@@ -2038,6 +2178,7 @@
       '<strong>' + readyCount + ' / ' + total + ' 発信準備OK</strong>　' +
       pubCount + ' / ' + total + ' 発信済み';
     updateBulkBtn();
+    updateGoMode();
     refreshP4Summary();
   }
   function updateWarning() {
@@ -2183,6 +2324,8 @@
       var pb = document.getElementById('editor-pub-btn');
       if (pb) pb.textContent = '★ 発信済み';
     }
+    updateP5ChecklistCard(mediaId);
+    updateP5ChecklistProgress();
   }
   function bulkPublish() {
     var readyList = MEDIA.filter(function(m) { return distData[m.id].status === 'ready'; });
@@ -2202,6 +2345,8 @@
     if (sortByStatus) sortGrid();
     refreshP4Summary();
     showToast('★ ' + readyList.length + ' 媒体を発信済みにしました。', null, 2200);
+    MEDIA.forEach(function(m) { updateP5ChecklistCard(m.id); });
+    updateP5ChecklistProgress();
   }
 
   // ---- Phase 4 summary (updated to use distData) ----
@@ -2617,6 +2762,156 @@
       });
     });
   }
+
+  // ---- Phase 3: GOモード ----
+  function updateGoMode() {
+    var el = document.getElementById('p3-go-banner');
+    if (!el) return;
+    var readyCount = MEDIA.filter(function(m) {
+      var st = distData[m.id].status;
+      return st === 'ready' || st === 'published';
+    }).length;
+    var pubCount = MEDIA.filter(function(m) {
+      return distData[m.id].status === 'published';
+    }).length;
+    var total = MEDIA.length;
+    if (readyCount === 0) { el.className = 'p3-go-banner'; el.innerHTML = ''; return; }
+    if (readyCount >= total) {
+      el.className = 'p3-go-banner go-full';
+      el.innerHTML =
+        '<span class="go-label">🟢 GO</span>' +
+        '<span class="go-text">全媒体 発信準備完了 — ' + pubCount + ' / ' + total + ' 発信済み</span>' +
+        '<button type="button" class="go-nav-btn" id="go-to-p5-btn">→ Phase 5 手動投稿へ</button>';
+    } else {
+      el.className = 'p3-go-banner go-partial';
+      el.innerHTML =
+        '<span class="go-label">🟡 準備中</span>' +
+        '<span class="go-text">' + readyCount + ' / ' + total + ' 媒体 GO 準備完了</span>';
+    }
+    var navBtn = document.getElementById('go-to-p5-btn');
+    if (navBtn) navBtn.addEventListener('click', function() {
+      setPhase('5');
+      showToast('⑤ 手動投稿チェックリストへ移動しました。', null, 1800);
+    });
+  }
+
+  // ---- Phase 5: 手動投稿チェックリスト ----
+  var P5_CHECKLIST_KEY = lsKey('p5_checklist');
+  var p5Checklist = {};
+  try { p5Checklist = JSON.parse(localStorage.getItem(P5_CHECKLIST_KEY) || '{}'); } catch(e) { p5Checklist = {}; }
+  function saveP5Checklist() { try { localStorage.setItem(P5_CHECKLIST_KEY, JSON.stringify(p5Checklist)); } catch(e) {} }
+
+  var P5_POST_HINTS = {
+    note_jp:            'note.com で投稿後、URLをここに記録',
+    substack_medium:    'substack.com で投稿 → 1週間後 medium.com にも投稿',
+    linkedin_en:        'linkedin.com で投稿後、URLをここに記録',
+    x_thread:           'X(Twitter)でスレッド5〜7投稿。最終投稿に note リンクを追加',
+    instagram_carousel: 'instagram.com でカルーセル10枚投稿',
+    youtube_desc:       'YouTube Studio で概要欄に貼り付け後、URLを記録'
+  };
+
+  function buildP5Checklist() {
+    var grid = document.getElementById('p5-checklist-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    MEDIA.forEach(function(m) {
+      var card = document.createElement('div');
+      card.id = 'p5-card-' + m.id;
+      grid.appendChild(card);
+    });
+    MEDIA.forEach(function(m) { updateP5ChecklistCard(m.id); });
+    updateP5ChecklistProgress();
+  }
+
+  function updateP5ChecklistCard(mediaId) {
+    var card = document.getElementById('p5-card-' + mediaId);
+    if (!card) return;
+    var m  = getMediaById(mediaId);
+    if (!m) return;
+    var d  = distData[mediaId];
+    var cl = p5Checklist[mediaId] || {};
+    var isEmpty = !d.text.trim();
+    var st = isEmpty ? 'empty' : d.status;
+    var preview = isEmpty ? '(まだ空)' : d.text.replace(/\s+/g, ' ').slice(0, 80);
+    var hint    = P5_POST_HINTS[mediaId] || '投稿後URLをここに記録';
+    var urlVal  = (distStateData && distStateData[mediaId] && distStateData[mediaId].url) ? distStateData[mediaId].url : '';
+
+    card.className = 'p5-checklist-card' +
+      (cl.checked ? ' p5-checked' : '') +
+      (d.status === 'published' ? ' p5-published' : '');
+    card.innerHTML =
+      '<div class="p5-card-header">' +
+        '<span class="p5-card-name">' + escAttr(m.tabLabel || m.label) + '</span>' +
+        '<span class="card-badge st-' + st + '">' + (STATUS_LABELS[st] || st) + '</span>' +
+        '<label class="p5-check-row">' +
+          '<input type="checkbox" class="p5-done-cb" data-media="' + mediaId + '"' + (cl.checked ? ' checked' : '') + '>' +
+          '<span>投稿済み確認</span>' +
+        '</label>' +
+      '</div>' +
+      '<div class="p5-card-preview' + (isEmpty ? ' empty' : '') + '">' +
+        escAttr(preview) + (!isEmpty && d.text.length > 80 ? '…' : '') +
+      '</div>' +
+      '<button type="button" class="p5-copy-btn" data-media="' + mediaId + '"' +
+        (isEmpty ? ' disabled' : '') + '>📄 本文をコピーして手動投稿</button>' +
+      '<div class="p5-field-label">投稿先メモ:</div>' +
+      '<textarea class="p5-memo-area" data-media="' + mediaId + '" placeholder="' + escAttr(hint) + '">' +
+        escAttr(cl.memo || '') +
+      '</textarea>' +
+      '<div class="p5-field-label">投稿URL:</div>' +
+      '<input type="url" class="p5-url-input" data-media="' + mediaId +
+        '" placeholder="https://..." value="' + escAttr(urlVal) + '">' +
+      '<button type="button" class="p5-pub-btn' + (d.status === 'published' ? ' is-published' : '') +
+        '" data-media="' + mediaId + '">' +
+        (d.status === 'published' ? '★ 発信済み（記録済み）' : '📤 発信済みにする（Phase 3 と連動）') +
+      '</button>';
+
+    var cb     = card.querySelector('.p5-done-cb');
+    var memoEl = card.querySelector('.p5-memo-area');
+    var urlEl  = card.querySelector('.p5-url-input');
+    var copyBtn = card.querySelector('.p5-copy-btn');
+    var pubBtn  = card.querySelector('.p5-pub-btn');
+
+    if (cb) cb.addEventListener('change', function() {
+      if (!p5Checklist[mediaId]) p5Checklist[mediaId] = {};
+      p5Checklist[mediaId].checked = cb.checked;
+      card.classList.toggle('p5-checked', cb.checked);
+      saveP5Checklist();
+      updateP5ChecklistProgress();
+    });
+    if (memoEl) memoEl.addEventListener('input', function() {
+      if (!p5Checklist[mediaId]) p5Checklist[mediaId] = {};
+      p5Checklist[mediaId].memo = memoEl.value;
+      saveP5Checklist();
+    });
+    if (urlEl) urlEl.addEventListener('input', function() {
+      if (!distStateData[mediaId]) distStateData[mediaId] = {};
+      distStateData[mediaId].url = urlEl.value;
+      saveDistState();
+      // sync back to Phase 5 table row
+      var tRow = document.querySelector('#dist-status-body tr[data-media="' + mediaId + '"] .dist-url-input');
+      if (tRow && tRow.value !== urlEl.value) tRow.value = urlEl.value;
+    });
+    if (copyBtn && !copyBtn.disabled) copyBtn.addEventListener('click', async function() {
+      try {
+        await navigator.clipboard.writeText(d.text);
+        showToast('📄 コピーしました（' + escAttr(m.tabLabel || m.label) + '）コピーして手動投稿してください。', null, 2600);
+      } catch(err) { showToast('⚠ コピー失敗。', 'error', 3000); }
+    });
+    if (pubBtn && !pubBtn.classList.contains('is-published')) {
+      pubBtn.addEventListener('click', function() { publishMedia(mediaId); });
+    }
+  }
+
+  function updateP5ChecklistProgress() {
+    var el = document.getElementById('p5-checklist-progress');
+    if (!el) return;
+    var checked = MEDIA.filter(function(m) { return (p5Checklist[m.id] || {}).checked; }).length;
+    var total = MEDIA.length;
+    el.textContent = checked + ' / ' + total + ' 媒体 投稿済み確認';
+    el.className = 'p5-checklist-progress' + (checked === total ? ' all-done' : '');
+  }
+
+  buildP5Checklist();
 
   // ---- Phase 1: トピック候補 (アクティブUI) ----
   (function initPhase1(){
