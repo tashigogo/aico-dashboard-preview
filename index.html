@@ -718,6 +718,9 @@
     font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; transition: background .15s;
   }
   .copy-btn:hover { background: #333; }
+  /* Batch 7: 構造化コピーは通常コピー(塗り)と区別してアウトライン表記 */
+  .copy-btn.struct-copy { background: #fff; color: #1A1A1A; border: 1.5px solid #1A1A1A; }
+  .copy-btn.struct-copy:hover { background: #f3f1ea; }
 
   /* ---- Phase 3: progress bar ---- */
   .p3-progress-wrap { margin: 0 0 18px; }
@@ -1024,6 +1027,7 @@
     .media-tab { flex: 0 0 auto; padding: 9px 11px; font-size: 12px; white-space: nowrap; }
     .media-output { font-size: 16px; min-height: 200px; } /* 16px avoids iOS zoom */
     .copy-btn { height: 44px; padding: 0 18px; font-size: 14px; }
+    .copy-btn.struct-copy { font-size: 12.5px; padding: 0 12px; } /* Batch7: 長いラベルでも収める */
     .char-count { font-size: 12.5px; }
     /* status select: 16px prevents iOS zoom; panel-foot stacks vertically */
     .status-select { font-size: 16px; height: 40px; border-radius: 8px; flex: 1; }
@@ -2528,6 +2532,47 @@
     return head + frame;
   }
 
+  // Batch 7: 構造化一括コピー(通常コピー📄とは別の📦導線)。X投稿セット / カルーセル原稿 / English Draft。
+  function copyStruct(text, name) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('📦 ' + name + 'をコピーしました。', null, 2200);
+    }).catch(function() {
+      console.log(text);
+      showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000);
+    });
+  }
+  function buildXCopy(mediaId) {
+    var d = distData[mediaId]; var imgs = d.images || [];
+    var imgLines = imgs.map(function(it) { return '・' + (it.kind || 'image') + '：' + (it.label || '') + (it.checked ? ' 〔採用〕' : ''); }).join('\n');
+    return '【X Post】\n\n' +
+      '本文：\n' + (d.text || '') + '\n\n' +
+      '参考・出典：\n' + (d.source || '') + '\n\n' +
+      '画像候補：\n' + (imgLines || '（なし）') + '\n\n' +
+      '注意：権利不明の画像は使用しない。\n';
+  }
+  function buildIGCopy(mediaId) {
+    var d = distData[mediaId]; var slides = d.slides || [];
+    var body = slides.map(function(s, i) {
+      var lang = s.lang === 'en' ? 'EN' : 'JP';
+      var oa = s.optA || {}; var ob = s.optB || {};
+      return 'Slide ' + (i + 1) + ' / ' + (s.role || '') + ' / ' + lang + '\n' +
+        'Text: ' + (s.text || '') + '\n' +
+        'Selected Image: ' + (s.selected ? ('Option ' + s.selected) : '（未選択）') + '\n' +
+        'Image Option A: ' + (oa.visual || '') + (oa.prompt ? ' — ' + oa.prompt : '') + '\n' +
+        'Image Option B: ' + (ob.visual || '') + (ob.prompt ? ' — ' + ob.prompt : '') + '\n';
+    }).join('\n');
+    return '【Instagram Carousel Script】\n\n' + body + '\nCaption:\n' + (d.text || '') + '\n';
+  }
+  function buildENCopy(mediaId) {
+    var d = distData[mediaId]; var mm = getMediaById(mediaId);
+    var toneMap = { linkedin_en: 'Executive / media strategist / insight-driven', substack_medium: 'Essay / reflective / global media perspective' };
+    return '【English Global Rewrite Draft】\n\n' +
+      'Media:\n' + ((mm && mm.label) || mediaId) + '\n\n' +
+      'Tone:\n' + (toneMap[mediaId] || 'global media perspective') + '\n\n' +
+      'Draft:\n' + (d.textEN || '') + '\n\n' +
+      'Note:\nThis is a structured English rewrite draft (AI global rewrite pending). Final wording should be polished by AI API or human editing, referencing the Japanese source, before publication.\n';
+  }
+
   function openEditor(mediaId) {
     var zoneEl = document.getElementById('media-editor-zone');
     if (!zoneEl) return;
@@ -2586,6 +2631,9 @@
       '<div class="editor-foot">' +
         '<span class="char-count" id="editor-cc">0 字 / 上限 ' + m.limit + '</span>' +
         '<div class="editor-foot-right">' +
+          (m.id === 'x_thread' ? '<button type="button" class="copy-btn struct-copy" id="x-set-copy-btn">📦 X投稿セットをコピー</button>' : '') +
+          (m.id === 'instagram_carousel' ? '<button type="button" class="copy-btn struct-copy" id="ig-set-copy-btn">📦 カルーセル原稿をコピー</button>' : '') +
+          (m.bilingual ? '<button type="button" class="copy-btn struct-copy" id="en-copy-btn">📦 English Draftをコピー</button>' : '') +
           '<button type="button" class="copy-btn" id="editor-copy-btn">📄 コピー</button>' +
         '</div>' +
       '</div>';
@@ -2718,6 +2766,13 @@
         showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000);
       }
     });
+    // Batch 7: 構造化一括コピーの配線
+    var xSetBtn = document.getElementById('x-set-copy-btn');
+    if (xSetBtn) xSetBtn.addEventListener('click', function() { copyStruct(buildXCopy(mediaId), 'X投稿セット'); });
+    var igSetBtn = document.getElementById('ig-set-copy-btn');
+    if (igSetBtn) igSetBtn.addEventListener('click', function() { copyStruct(buildIGCopy(mediaId), 'カルーセル原稿'); });
+    var enCopyBtn = document.getElementById('en-copy-btn');
+    if (enCopyBtn) enCopyBtn.addEventListener('click', function() { copyStruct(buildENCopy(mediaId), 'English Draft'); });
     // Batch 1b: 編集画面の発信ボタンは廃止(発信は Phase 5)。publishMedia は一括発信/Phase5 で使用継続。
 
     zoneEl.style.display = '';
