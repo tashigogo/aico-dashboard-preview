@@ -637,6 +637,18 @@
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif; resize: vertical;
   }
   .media-output:focus { outline: none; border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+
+  /* Batch 2: bilingual preview tabs (editor) */
+  .preview-tabs { display: flex; gap: 6px; margin: 2px 0 8px; }
+  .preview-tab {
+    flex: 1 1 0; min-width: 0; height: 36px; padding: 0 10px;
+    border: 1px solid #d8d6d0; border-radius: 8px; background: #FAFAF7; color: #777;
+    font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .preview-tab:hover { background: #f3f1ea; color: #555; }
+  .preview-tab.active { background: #1A1A1A; color: #fff; border-color: #1A1A1A; }
   .panel-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 12px; }
   .char-count { font-size: 12px; color: #888; font-family: ui-monospace, Menlo, Consolas, monospace; }
   .char-count.over { color: #c0392b; font-weight: 700; }
@@ -1264,6 +1276,7 @@
   @media (max-width: 768px) { .p5-checklist-grid { grid-template-columns: 1fr; } }
   @media (max-width: 600px) {
     .card-copy-btn { font-size: 11px; height: 28px; }
+    .preview-tab { font-size: 12px; height: 40px; } /* Batch2: tap-friendly bilingual tabs */
     .p5-copy-btn { font-size: 14px; padding: 12px 14px; }
   }
 </style>
@@ -1624,6 +1637,7 @@
   const DIST_KEY = lsKey('dist_outputs');           // Phase3: 6媒体出力
   const DIST_STATUS_KEY = lsKey('dist_status');    // Phase3: 各媒体ステータス
   const DIST_PUB_TIME_KEY = lsKey('dist_pub_time');// Phase3: 発信記録タイムスタンプ
+  const DIST_EN_KEY = lsKey('dist_en');            // Batch2: English Preview(global rewrite)テキスト
   const VERIFY_KEY = lsKey('verify_state');         // Phase4: 8項目チェック
   const PHASE_KEY = lsKey('active_phase'); // アクティブフェーズ
   const DIST_STATE_KEY = lsKey('dist_state'); // Phase5: 配信状態(状態/URL/更新時刻)
@@ -1989,7 +2003,7 @@
       apiEndpoint: null, publishedUrl: null
     },
     {
-      id:'substack_medium', label:'Substack / Medium', tabLabel:'Sub/Med',
+      id:'substack_medium', label:'Substack / Medium', tabLabel:'Sub/Med', bilingual:true,
       limit:6000, limitMin:2000,
       purpose:'英語・並列生成（翻訳ではない）。Substackが本館、Mediumが圧縮版。',
       length:'Substack: 2000〜6000字 / Medium: Substack の40〜50%（上限 6000字）',
@@ -1998,7 +2012,7 @@
       apiEndpoint: null, publishedUrl: null
     },
     {
-      id:'linkedin_en', label:'LinkedIn', tabLabel:'LinkedIn',
+      id:'linkedin_en', label:'LinkedIn', tabLabel:'LinkedIn', bilingual:true,
       limit:1500, limitMin:1200,
       purpose:'英語・ENハブ。ビジネス層への接点。',
       length:'1200〜1500字（上限 1500字）',
@@ -2144,10 +2158,11 @@
 
   // ---- data load / save ----
   function loadDistData() {
-    var texts = {}, statuses = {}, pubTimes = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {};
     try { texts = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e) {}
     try { statuses = JSON.parse(localStorage.getItem(DIST_STATUS_KEY) || '{}'); } catch(e) {}
     try { pubTimes = JSON.parse(localStorage.getItem(DIST_PUB_TIME_KEY) || '{}'); } catch(e) {}
+    try { textsEN = JSON.parse(localStorage.getItem(DIST_EN_KEY) || '{}'); } catch(e) {}
     // migrate old keys: substack_en + medium_en → substack_medium
     if (!texts['substack_medium'] && (texts['substack_en'] || texts['medium_en'])) {
       texts['substack_medium'] = (texts['substack_en'] || '') +
@@ -2156,22 +2171,25 @@
     MEDIA.forEach(function(m) {
       distData[m.id] = {
         text: texts[m.id] || '',
+        textEN: textsEN[m.id] || '',
         status: statuses[m.id] || 'draft',
         pubTime: pubTimes[m.id] || null
       };
     });
   }
   function saveDistData() {
-    var texts = {}, statuses = {}, pubTimes = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {};
     MEDIA.forEach(function(m) {
       var d = distData[m.id];
       texts[m.id] = d.text;
+      if (d.textEN) textsEN[m.id] = d.textEN;
       statuses[m.id] = d.status;
       if (d.pubTime) pubTimes[m.id] = d.pubTime;
     });
     try { localStorage.setItem(DIST_KEY, JSON.stringify(texts)); } catch(e) {}
     try { localStorage.setItem(DIST_STATUS_KEY, JSON.stringify(statuses)); } catch(e) {}
     try { localStorage.setItem(DIST_PUB_TIME_KEY, JSON.stringify(pubTimes)); } catch(e) {}
+    try { localStorage.setItem(DIST_EN_KEY, JSON.stringify(textsEN)); } catch(e) {}
   }
   // compat shims (existing code may call these)
   function saveDistOutputs() { saveDistData(); }
@@ -2317,6 +2335,27 @@
   }
 
   // ---- editor zone ----
+  // Batch 2: English Preview = global rewrite の下書き種(直訳ではない)。媒体トーン別の英語スキャフォルド + JP参照。
+  function buildEnScaffold(m, jpText) {
+    var ref = (jpText || '').replace(/\s+/g, ' ').trim();
+    var refBlock = '\n\n— — — reference: Japanese source — — —\n' +
+      (ref || '(Phase 2 の本文から「⚡ 6媒体に変換」で生成されます)');
+    var head, frame;
+    if (m.id === 'linkedin_en') {
+      head = '[English global rewrite — LinkedIn · executive / media-strategist tone]\n' +
+             '(Not a translation. Rewrite for a global business audience. Conclusion-first, insight-driven, minimal self-intro.)';
+      frame = '\n\nHook (1–2 lines, lead with the conclusion):\n…\n\nWhy it matters (operator / executive insight):\n…\n\nSo what / CTA:\n…\n\n#hashtags';
+    } else if (m.id === 'substack_medium') {
+      head = '[English global rewrite — Substack (essay/reflective) + Medium (global-media column) tone]\n' +
+             '(Not a translation. A reader essay: personal perspective + a clear argument that travels across borders.)';
+      frame = '\n\nOpening (a reflective hook that pulls the reader in):\n…\n\nThe idea (your perspective, with one concrete scene):\n…\n\nThe argument (why this matters globally):\n…\n\nClose (a thought that lingers):\n…';
+    } else {
+      head = '[English global rewrite — global media tone]\n(Not a translation. Rewrite for an international audience.)';
+      frame = '\n\n…';
+    }
+    return head + frame + refBlock;
+  }
+
   function openEditor(mediaId) {
     var zoneEl = document.getElementById('media-editor-zone');
     if (!zoneEl) return;
@@ -2348,8 +2387,16 @@
         '<div class="panel-spec-row"><span class="panel-spec-key">目安</span><span class="panel-spec-val">' + m.length + '</span></div>' +
         '<div class="panel-spec-row"><span class="panel-spec-key">注意</span><span class="panel-spec-val">' + m.caution + '</span></div>' +
       '</div>' +
+      (m.bilingual ?
+        '<div class="preview-tabs" id="editor-lang-tabs">' +
+          '<button type="button" class="preview-tab active" data-lang="ja">🇯🇵 Japanese Preview</button>' +
+          '<button type="button" class="preview-tab" data-lang="en">🌐 English Preview</button>' +
+        '</div>' : '') +
       '<textarea class="media-output" id="editor-textarea"' +
         ' placeholder="ここに「' + m.label + '」向けの変換結果が入ります。"></textarea>' +
+      (m.bilingual ?
+        '<textarea class="media-output" id="editor-textarea-en" style="display:none;"' +
+          ' placeholder="English global rewrite（直訳ではない）。トーンに沿って英語で書く / Claude の生成を貼る。"></textarea>' : '') +
       '<div class="editor-foot">' +
         '<span class="char-count" id="editor-cc">0 字 / 上限 ' + m.limit + '</span>' +
         '<div class="editor-foot-right">' +
@@ -2357,22 +2404,54 @@
         '</div>' +
       '</div>';
 
-    var ta  = document.getElementById('editor-textarea');
-    var cc  = document.getElementById('editor-cc');
-    var sel = document.getElementById('editor-status-select');
+    var ta   = document.getElementById('editor-textarea');
+    var taEN = document.getElementById('editor-textarea-en');
+    var cc   = document.getElementById('editor-cc');
+    var sel  = document.getElementById('editor-status-select');
+    var curLang = 'ja';
     ta.value = d.text;
-    cc.textContent = d.text.length + ' 字 / 上限 ' + m.limit;
-    cc.classList.toggle('over', d.text.length > m.limit);
+
+    function setCC() {
+      if (curLang === 'en' && taEN) {
+        cc.textContent = taEN.value.length + ' 字（English / global rewrite）';
+        cc.classList.remove('over');
+      } else {
+        cc.textContent = ta.value.length + ' 字 / 上限 ' + m.limit;
+        cc.classList.toggle('over', ta.value.length > m.limit);
+      }
+    }
+    setCC();
 
     ta.addEventListener('input', function() {
       distData[mediaId].text = ta.value;
-      cc.textContent = ta.value.length + ' 字 / 上限 ' + m.limit;
-      cc.classList.toggle('over', ta.value.length > m.limit);
-      updateCard(mediaId);
+      setCC();
+      updateCard(mediaId);   // JP 本文のみカード/進捗に反映
       updateProgress();
       updateWarning();
       saveDistData();
     });
+
+    // Batch 2: bilingual 媒体は EN(global rewrite)タブを追加
+    if (m.bilingual && taEN) {
+      if (!distData[mediaId].textEN) distData[mediaId].textEN = buildEnScaffold(m, d.text); // 初回のみ種を投入
+      taEN.value = distData[mediaId].textEN;
+      taEN.addEventListener('input', function() {
+        distData[mediaId].textEN = taEN.value;
+        setCC();
+        saveDistData();      // EN はカード/進捗には影響させない(JP が正)
+      });
+      var tabsEl = document.getElementById('editor-lang-tabs');
+      tabsEl.addEventListener('click', function(e) {
+        var b = e.target.closest('.preview-tab'); if (!b) return;
+        curLang = b.dataset.lang;
+        Array.prototype.forEach.call(tabsEl.querySelectorAll('.preview-tab'), function(x) { x.classList.toggle('active', x === b); });
+        var en = (curLang === 'en');
+        ta.style.display   = en ? 'none' : '';
+        taEN.style.display = en ? '' : 'none';
+        setCC();
+      });
+    }
+
     sel.addEventListener('change', function() {
       distData[mediaId].status = sel.value;
       sel.className = 'status-select st-' + sel.value;
@@ -2384,12 +2463,13 @@
     });
     document.getElementById('editor-close-btn').addEventListener('click', closeEditor);
     document.getElementById('editor-copy-btn').addEventListener('click', async function() {
-      if (!ta.value.trim()) { showToast('この媒体はまだ空です。', 'warn', 2000); return; }
+      var active = (curLang === 'en' && taEN) ? taEN : ta;
+      if (!active.value.trim()) { showToast('この媒体はまだ空です。', 'warn', 2000); return; }
       try {
-        await navigator.clipboard.writeText(ta.value);
-        showToast('📄 コピーしました(' + mediaId + ')', null, 1800);
+        await navigator.clipboard.writeText(active.value);
+        showToast('📄 コピーしました(' + mediaId + ' / ' + curLang.toUpperCase() + ')', null, 1800);
       } catch(err) {
-        console.log(ta.value);
+        console.log(active.value);
         showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000);
       }
     });
