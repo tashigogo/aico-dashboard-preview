@@ -649,6 +649,20 @@
   }
   .preview-tab:hover { background: #f3f1ea; color: #555; }
   .preview-tab.active { background: #1A1A1A; color: #fff; border-color: #1A1A1A; }
+
+  /* Batch 3: X narrative guide + image ideas */
+  .x-guide {
+    font-size: 12px; line-height: 1.7; color: #6a541a; background: #fff8e1;
+    border-left: 3px solid #f0a500; border-radius: 0 6px 6px 0; padding: 9px 12px; margin: 2px 0 10px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .x-images { margin: 4px 0 8px; }
+  .x-images-label { font-size: 12px; font-weight: 700; color: #777; margin-bottom: 6px; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .x-image-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+  .x-image-row input[type="checkbox"] { width: 18px; height: 18px; flex: none; accent-color: #c0392b; cursor: pointer; }
+  .x-image-tag { flex: none; font-size: 11px; font-weight: 700; color: #999; width: 48px; }
+  .x-image-label { flex: 1 1 auto; min-width: 0; font-size: 13px; padding: 6px 8px; border: 1px solid #d8d6d0; border-radius: 6px; color: #1A1A1A; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .x-image-label:focus { outline: none; border-color: #c0392b; }
   .panel-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 12px; }
   .char-count { font-size: 12px; color: #888; font-family: ui-monospace, Menlo, Consolas, monospace; }
   .char-count.over { color: #c0392b; font-weight: 700; }
@@ -1277,6 +1291,8 @@
   @media (max-width: 600px) {
     .card-copy-btn { font-size: 11px; height: 28px; }
     .preview-tab { font-size: 12px; height: 40px; } /* Batch2: tap-friendly bilingual tabs */
+    .x-image-label { font-size: 16px; } /* Batch3: avoid iOS zoom */
+    .x-image-row input[type="checkbox"] { width: 22px; height: 22px; }
     .p5-copy-btn { font-size: 14px; padding: 12px 14px; }
   }
 </style>
@@ -1638,6 +1654,7 @@
   const DIST_STATUS_KEY = lsKey('dist_status');    // Phase3: 各媒体ステータス
   const DIST_PUB_TIME_KEY = lsKey('dist_pub_time');// Phase3: 発信記録タイムスタンプ
   const DIST_EN_KEY = lsKey('dist_en');            // Batch2: English Preview(global rewrite)テキスト
+  const DIST_IMG_KEY = lsKey('dist_images');       // Batch3: 画像案(media別の image ideas / 選択状態)
   const VERIFY_KEY = lsKey('verify_state');         // Phase4: 8項目チェック
   const PHASE_KEY = lsKey('active_phase'); // アクティブフェーズ
   const DIST_STATE_KEY = lsKey('dist_state'); // Phase5: 配信状態(状態/URL/更新時刻)
@@ -2105,8 +2122,15 @@
                '\n\n【問い】あなたの現場では、これはどう映るでしょうか?\n\n' + AICO_TAGS;
         break;
       case 'x_thread': {
-        var pts = sents.slice(0, 4).map(function(s, i){ return (i + 1) + '/ ' + trimTo(s, 120); }).join('\n\n');
-        text = title + '\n\n' + pts + '\n\n→ 続きは note で(リンク)\n#AIco';
+        // narrative thread(要約ではない): Hook → Tension/Paradox → Main(背景) → CTA(言い切らない)
+        var xs = sents.length ? sents : [title];
+        var posts = [];
+        posts.push(trimTo(xs[0], 120));                                   // ① Hook(冒頭で止める)
+        if (xs[1]) posts.push(trimTo(xs[1], 120));                        // ② Tension/Paradox(違和感・問い)
+        xs.slice(2, 7).forEach(function(s){ posts.push(trimTo(s, 120)); }); // ③ Main thread(背景)
+        while (posts.length < 4) posts.push('なぜそうなるのか——理由はひとつではない。');
+        posts.push('……ここから先は、note に書いた。(リンク)');             // ④ CTA(続きを読みたく)
+        text = posts.map(function(p, i){ return (i + 1) + '/ ' + p; }).join('\n\n') + '\n\n#AIco';
         break;
       }
       case 'instagram_carousel':
@@ -2158,11 +2182,12 @@
 
   // ---- data load / save ----
   function loadDistData() {
-    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {};
     try { texts = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e) {}
     try { statuses = JSON.parse(localStorage.getItem(DIST_STATUS_KEY) || '{}'); } catch(e) {}
     try { pubTimes = JSON.parse(localStorage.getItem(DIST_PUB_TIME_KEY) || '{}'); } catch(e) {}
     try { textsEN = JSON.parse(localStorage.getItem(DIST_EN_KEY) || '{}'); } catch(e) {}
+    try { imagesData = JSON.parse(localStorage.getItem(DIST_IMG_KEY) || '{}'); } catch(e) {}
     // migrate old keys: substack_en + medium_en → substack_medium
     if (!texts['substack_medium'] && (texts['substack_en'] || texts['medium_en'])) {
       texts['substack_medium'] = (texts['substack_en'] || '') +
@@ -2172,17 +2197,19 @@
       distData[m.id] = {
         text: texts[m.id] || '',
         textEN: textsEN[m.id] || '',
+        images: (imagesData[m.id] && imagesData[m.id].length) ? imagesData[m.id] : defaultImageIdeas(m.id),
         status: statuses[m.id] || 'draft',
         pubTime: pubTimes[m.id] || null
       };
     });
   }
   function saveDistData() {
-    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {};
     MEDIA.forEach(function(m) {
       var d = distData[m.id];
       texts[m.id] = d.text;
       if (d.textEN) textsEN[m.id] = d.textEN;
+      if (d.images && d.images.length) imagesData[m.id] = d.images;
       statuses[m.id] = d.status;
       if (d.pubTime) pubTimes[m.id] = d.pubTime;
     });
@@ -2190,6 +2217,7 @@
     try { localStorage.setItem(DIST_STATUS_KEY, JSON.stringify(statuses)); } catch(e) {}
     try { localStorage.setItem(DIST_PUB_TIME_KEY, JSON.stringify(pubTimes)); } catch(e) {}
     try { localStorage.setItem(DIST_EN_KEY, JSON.stringify(textsEN)); } catch(e) {}
+    try { localStorage.setItem(DIST_IMG_KEY, JSON.stringify(imagesData)); } catch(e) {}
   }
   // compat shims (existing code may call these)
   function saveDistOutputs() { saveDistData(); }
@@ -2335,6 +2363,30 @@
   }
 
   // ---- editor zone ----
+  // Batch 3: X 画像案(placeholder / 将来 API で url・prompt を充填する想定のデータ構造)
+  function defaultImageIdeas(mediaId) {
+    if (mediaId === 'x_thread') {
+      return [
+        { label:'都市の夜景と孤独な人物（cinematic）', checked:false, url:null, prompt:null },
+        { label:'編集室のデスクとノート（editorial）', checked:false, url:null, prompt:null },
+        { label:'抽象的な光とテキストタイポグラフィ（emotional）', checked:false, url:null, prompt:null }
+      ];
+    }
+    return [];
+  }
+  function renderXImages(mediaId) {
+    var listEl = document.getElementById('x-image-list');
+    if (!listEl) return;
+    var ideas = distData[mediaId].images || [];
+    listEl.innerHTML = ideas.map(function(it, i) {
+      return '<label class="x-image-row">' +
+        '<input type="checkbox" class="x-image-chk" data-i="' + i + '"' + (it.checked ? ' checked' : '') + '>' +
+        '<span class="x-image-tag">image' + (i + 1) + '</span>' +
+        '<input type="text" class="x-image-label" data-i="' + i + '" value="' + escAttr(it.label) + '">' +
+        '</label>';
+    }).join('');
+  }
+
   // Batch 2: English Preview = global rewrite の下書き種(直訳ではない)。媒体トーン別の英語スキャフォルド + JP参照。
   function buildEnScaffold(m, jpText) {
     var ref = (jpText || '').replace(/\s+/g, ' ').trim();
@@ -2397,6 +2449,11 @@
       (m.bilingual ?
         '<textarea class="media-output" id="editor-textarea-en" style="display:none;"' +
           ' placeholder="English global rewrite（直訳ではない）。トーンに沿って英語で書く / Claude の生成を貼る。"></textarea>' : '') +
+      (m.id === 'x_thread' ?
+        '<div class="x-guide"><strong>X narrative thread</strong>（要約ではなく「続きを読みたくさせる」入口）<br>' +
+          '① Hook（冒頭で止める）→ ② Tension / Paradox（違和感・問い）→ ③ Main thread（5〜7投稿で背景）→ ④ CTA（note へ誘導・言い切らない）</div>' +
+        '<div class="x-images"><div class="x-images-label">🖼 Image Ideas（画像生成・選択用 / 現在は placeholder・将来 API 接続）</div>' +
+          '<div id="x-image-list"></div></div>' : '') +
       '<div class="editor-foot">' +
         '<span class="char-count" id="editor-cc">0 字 / 上限 ' + m.limit + '</span>' +
         '<div class="editor-foot-right">' +
@@ -2450,6 +2507,22 @@
         taEN.style.display = en ? '' : 'none';
         setCC();
       });
+    }
+
+    // Batch 3: X 画像案UI(チェック選択 + ラベル編集) — 将来API用に data 構造を保持
+    if (m.id === 'x_thread') {
+      renderXImages(mediaId);
+      var xImgList = document.getElementById('x-image-list');
+      if (xImgList) {
+        xImgList.addEventListener('change', function(e) {
+          var chk = e.target.closest('.x-image-chk');
+          if (chk) { distData[mediaId].images[+chk.dataset.i].checked = chk.checked; saveDistData(); }
+        });
+        xImgList.addEventListener('input', function(e) {
+          var lbl = e.target.closest('.x-image-label');
+          if (lbl) { distData[mediaId].images[+lbl.dataset.i].label = lbl.value; saveDistData(); }
+        });
+      }
     }
 
     sel.addEventListener('change', function() {
