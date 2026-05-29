@@ -663,6 +663,32 @@
   .x-image-tag { flex: none; font-size: 11px; font-weight: 700; color: #999; width: 48px; }
   .x-image-label { flex: 1 1 auto; min-width: 0; font-size: 13px; padding: 6px 8px; border: 1px solid #d8d6d0; border-radius: 6px; color: #1A1A1A; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
   .x-image-label:focus { outline: none; border-color: #c0392b; }
+
+  /* Batch 4: Instagram carousel editor */
+  .ig-guide {
+    font-size: 12px; line-height: 1.7; color: #444; background: #f4f1ff;
+    border-left: 3px solid #6c5ce7; border-radius: 0 6px 6px 0; padding: 9px 12px; margin: 2px 0 10px;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .ig-guide .ig-aes { color: #6c5ce7; font-size: 11px; letter-spacing: 0.02em; }
+  .ig-script-label, .ig-caption-label { font-size: 12px; font-weight: 700; color: #777; margin: 6px 0 6px; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .ig-caption-label { margin-top: 12px; }
+  .ig-slide-list { display: flex; flex-direction: column; gap: 10px; }
+  .ig-slide { border: 1px solid #ececec; border-radius: 10px; padding: 12px; background: #FAFAF7; }
+  .ig-slide-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .ig-slide-no { font-size: 13px; font-weight: 700; color: #1A1A1A; }
+  .ig-slide-lang { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .ig-slide-lang.ja { background: #fdecea; color: #c0392b; }
+  .ig-slide-lang.en { background: #e8f0fe; color: #2980B9; }
+  .ig-slide-cc { margin-left: auto; font-size: 11px; color: #999; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .ig-slide-cc.over { color: #c0392b; font-weight: 700; }
+  .ig-slide-text { width: 100%; min-height: 48px; padding: 8px 10px; border: 1.5px solid #d8d6d0; border-radius: 8px; background: #fff; font-size: 14px; line-height: 1.6; resize: vertical; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .ig-slide-design { width: 100%; margin-top: 6px; padding: 6px 9px; border: 1px solid #d8d6d0; border-radius: 6px; font-size: 12px; color: #555; background: #fff; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .ig-img-opt { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .ig-img-pick { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #555; white-space: nowrap; flex: none; }
+  .ig-img-pick input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6c5ce7; cursor: pointer; }
+  .ig-img-a, .ig-img-b { flex: 1 1 auto; min-width: 0; padding: 6px 8px; border: 1px solid #d8d6d0; border-radius: 6px; font-size: 12.5px; color: #1A1A1A; background: #fff; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .ig-slide-text:focus, .ig-slide-design:focus, .ig-img-a:focus, .ig-img-b:focus { outline: none; border-color: #6c5ce7; }
   .panel-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 12px; }
   .char-count { font-size: 12px; color: #888; font-family: ui-monospace, Menlo, Consolas, monospace; }
   .char-count.over { color: #c0392b; font-weight: 700; }
@@ -1293,6 +1319,9 @@
     .preview-tab { font-size: 12px; height: 40px; } /* Batch2: tap-friendly bilingual tabs */
     .x-image-label { font-size: 16px; } /* Batch3: avoid iOS zoom */
     .x-image-row input[type="checkbox"] { width: 22px; height: 22px; }
+    .ig-slide-text, .ig-img-a, .ig-img-b { font-size: 16px; } /* Batch4: avoid iOS zoom */
+    .ig-slide-design { font-size: 14px; }
+    .ig-img-pick input[type="checkbox"] { width: 22px; height: 22px; }
     .p5-copy-btn { font-size: 14px; padding: 12px 14px; }
   }
 </style>
@@ -1655,6 +1684,7 @@
   const DIST_PUB_TIME_KEY = lsKey('dist_pub_time');// Phase3: 発信記録タイムスタンプ
   const DIST_EN_KEY = lsKey('dist_en');            // Batch2: English Preview(global rewrite)テキスト
   const DIST_IMG_KEY = lsKey('dist_images');       // Batch3: 画像案(media別の image ideas / 選択状態)
+  const DIST_SLIDES_KEY = lsKey('dist_slides');    // Batch4: Instagram carousel スライド(5枚)
   const VERIFY_KEY = lsKey('verify_state');         // Phase4: 8項目チェック
   const PHASE_KEY = lsKey('active_phase'); // アクティブフェーズ
   const DIST_STATE_KEY = lsKey('dist_state'); // Phase5: 配信状態(状態/URL/更新時刻)
@@ -2182,12 +2212,13 @@
 
   // ---- data load / save ----
   function loadDistData() {
-    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {}, slidesData = {};
     try { texts = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e) {}
     try { statuses = JSON.parse(localStorage.getItem(DIST_STATUS_KEY) || '{}'); } catch(e) {}
     try { pubTimes = JSON.parse(localStorage.getItem(DIST_PUB_TIME_KEY) || '{}'); } catch(e) {}
     try { textsEN = JSON.parse(localStorage.getItem(DIST_EN_KEY) || '{}'); } catch(e) {}
     try { imagesData = JSON.parse(localStorage.getItem(DIST_IMG_KEY) || '{}'); } catch(e) {}
+    try { slidesData = JSON.parse(localStorage.getItem(DIST_SLIDES_KEY) || '{}'); } catch(e) {}
     // migrate old keys: substack_en + medium_en → substack_medium
     if (!texts['substack_medium'] && (texts['substack_en'] || texts['medium_en'])) {
       texts['substack_medium'] = (texts['substack_en'] || '') +
@@ -2198,18 +2229,20 @@
         text: texts[m.id] || '',
         textEN: textsEN[m.id] || '',
         images: (imagesData[m.id] && imagesData[m.id].length) ? imagesData[m.id] : defaultImageIdeas(m.id),
+        slides: (slidesData[m.id] && slidesData[m.id].length) ? slidesData[m.id] : defaultSlides(m.id),
         status: statuses[m.id] || 'draft',
         pubTime: pubTimes[m.id] || null
       };
     });
   }
   function saveDistData() {
-    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {}, slidesData = {};
     MEDIA.forEach(function(m) {
       var d = distData[m.id];
       texts[m.id] = d.text;
       if (d.textEN) textsEN[m.id] = d.textEN;
       if (d.images && d.images.length) imagesData[m.id] = d.images;
+      if (d.slides && d.slides.length) slidesData[m.id] = d.slides;
       statuses[m.id] = d.status;
       if (d.pubTime) pubTimes[m.id] = d.pubTime;
     });
@@ -2218,6 +2251,7 @@
     try { localStorage.setItem(DIST_PUB_TIME_KEY, JSON.stringify(pubTimes)); } catch(e) {}
     try { localStorage.setItem(DIST_EN_KEY, JSON.stringify(textsEN)); } catch(e) {}
     try { localStorage.setItem(DIST_IMG_KEY, JSON.stringify(imagesData)); } catch(e) {}
+    try { localStorage.setItem(DIST_SLIDES_KEY, JSON.stringify(slidesData)); } catch(e) {}
   }
   // compat shims (existing code may call these)
   function saveDistOutputs() { saveDistData(); }
@@ -2387,6 +2421,39 @@
     }).join('');
   }
 
+  // Batch 4: Instagram carousel(5スライド / 日2・英3)。将来 API で各スライドの画像url等を充填する想定の構造。
+  function defaultSlides(mediaId) {
+    if (mediaId !== 'instagram_carousel') return [];
+    return [
+      { lang:'ja', text:'', design:'表紙 / emotional typography / 余白大（止める一言）', optA:'都市の夜景と一人（cinematic）', optB:'余白に一語（typography）', selected:null },
+      { lang:'ja', text:'', design:'問い・違和感 / editorial',                       optA:'手元のノート（editorial）',     optB:'静かな部屋の光（emotional）',  selected:null },
+      { lang:'en', text:'', design:'world view opens / Monocle tone',                optA:'global cityscape (Monocle)',    optB:'minimal data viz (editorial)', selected:null },
+      { lang:'en', text:'', design:'insight / Netflix documentary still',           optA:'documentary portrait',          optB:'abstract light + type',        selected:null },
+      { lang:'en', text:'', design:'CTA → Substack/Medium / Apple keynote closing', optA:'clean keynote slide',           optB:'single line on black',         selected:null }
+    ];
+  }
+  function renderIGSlides(mediaId) {
+    var listEl = document.getElementById('ig-slide-list');
+    if (!listEl) return;
+    var slides = distData[mediaId].slides || [];
+    listEl.innerHTML = slides.map(function(s, i) {
+      var len = (s.text || '').length;
+      return '<div class="ig-slide">' +
+        '<div class="ig-slide-head">' +
+          '<span class="ig-slide-no">Slide ' + (i + 1) + '</span>' +
+          '<span class="ig-slide-lang ' + (s.lang === 'en' ? 'en' : 'ja') + '">' + (s.lang === 'en' ? 'English' : '日本語') + '</span>' +
+          '<span class="ig-slide-cc' + (len > 50 ? ' over' : '') + '">' + len + '/50</span>' +
+        '</div>' +
+        '<textarea class="ig-slide-text" data-i="' + i + '" rows="2" placeholder="Slide ' + (i + 1) + ' のテキスト（〜50字目安・止める一言）">' + escAttr(s.text || '') + '</textarea>' +
+        '<input type="text" class="ig-slide-design" data-i="' + i + '" placeholder="Design Direction" value="' + escAttr(s.design || '') + '">' +
+        '<div class="ig-img-opt"><label class="ig-img-pick"><input type="checkbox" class="ig-img-sel" data-i="' + i + '" data-opt="A"' + (s.selected === 'A' ? ' checked' : '') + '> A</label>' +
+          '<input type="text" class="ig-img-a" data-i="' + i + '" placeholder="Option A image" value="' + escAttr(s.optA || '') + '"></div>' +
+        '<div class="ig-img-opt"><label class="ig-img-pick"><input type="checkbox" class="ig-img-sel" data-i="' + i + '" data-opt="B"' + (s.selected === 'B' ? ' checked' : '') + '> B</label>' +
+          '<input type="text" class="ig-img-b" data-i="' + i + '" placeholder="Option B image" value="' + escAttr(s.optB || '') + '"></div>' +
+      '</div>';
+    }).join('');
+  }
+
   // Batch 2: English Preview = global rewrite の下書き種(直訳ではない)。媒体トーン別の英語スキャフォルド + JP参照。
   function buildEnScaffold(m, jpText) {
     var ref = (jpText || '').replace(/\s+/g, ' ').trim();
@@ -2427,6 +2494,14 @@
         '>' + o[1] + '</option>';
     }).join('');
 
+    // Batch 4: Instagram は carousel を主役に。caption は下部の補助欄として温存。
+    var igPanels = (m.id === 'instagram_carousel') ?
+      ('<div class="ig-guide"><strong>Instagram Carousel</strong> — 読ませるより<strong>止める</strong>／説明より<strong>印象</strong>。caption ではなく carousel narrative。日本語2枚で感情をつかみ、英語3枚で世界観を広げる。<br>' +
+        '<span class="ig-aes">aesthetic: Apple keynote · Netflix documentary · Monocle · editorial · emotional typography</span></div>' +
+      '<div class="ig-script-label">📐 Instagram Carousel Script（主役 / 各スライド〜50字目安）</div>' +
+      '<div id="ig-slide-list" class="ig-slide-list"></div>' +
+      '<div class="ig-caption-label">↓ 補助: caption（任意）</div>') : '';
+
     zoneEl.innerHTML =
       '<div class="editor-header">' +
         '<span class="editor-title">' + m.label + '（編集中）</span>' +
@@ -2444,6 +2519,7 @@
           '<button type="button" class="preview-tab active" data-lang="ja">🇯🇵 Japanese Preview</button>' +
           '<button type="button" class="preview-tab" data-lang="en">🌐 English Preview</button>' +
         '</div>' : '') +
+      (m.id === 'instagram_carousel' ? igPanels : '') +
       '<textarea class="media-output" id="editor-textarea"' +
         ' placeholder="ここに「' + m.label + '」向けの変換結果が入ります。"></textarea>' +
       (m.bilingual ?
@@ -2521,6 +2597,37 @@
         xImgList.addEventListener('input', function(e) {
           var lbl = e.target.closest('.x-image-label');
           if (lbl) { distData[mediaId].images[+lbl.dataset.i].label = lbl.value; saveDistData(); }
+        });
+      }
+    }
+
+    // Batch 4: Instagram carousel(5スライド)編集 — 将来API用に slides data 構造を保持
+    if (m.id === 'instagram_carousel') {
+      renderIGSlides(mediaId);
+      var igList = document.getElementById('ig-slide-list');
+      if (igList) {
+        igList.addEventListener('input', function(e) {
+          var t = e.target; var i = +t.dataset.i;
+          if (isNaN(i) || !distData[mediaId].slides[i]) return;
+          var s = distData[mediaId].slides[i];
+          if (t.classList.contains('ig-slide-text')) {
+            s.text = t.value;
+            var ccx = t.parentNode.querySelector('.ig-slide-cc');
+            if (ccx) { ccx.textContent = t.value.length + '/50'; ccx.classList.toggle('over', t.value.length > 50); }
+          } else if (t.classList.contains('ig-slide-design')) { s.design = t.value; }
+          else if (t.classList.contains('ig-img-a')) { s.optA = t.value; }
+          else if (t.classList.contains('ig-img-b')) { s.optB = t.value; }
+          else return;
+          saveDistData();
+        });
+        igList.addEventListener('change', function(e) {
+          var chk = e.target.closest('.ig-img-sel'); if (!chk) return;
+          var i = +chk.dataset.i; var s = distData[mediaId].slides[i];
+          if (chk.checked) {
+            s.selected = chk.dataset.opt;
+            Array.prototype.forEach.call(chk.closest('.ig-slide').querySelectorAll('.ig-img-sel'), function(o) { if (o !== chk) o.checked = false; });
+          } else { s.selected = null; }
+          saveDistData();
         });
       }
     }
