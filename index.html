@@ -689,6 +689,26 @@
   .ig-img-pick input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6c5ce7; cursor: pointer; }
   .ig-img-a, .ig-img-b { flex: 1 1 auto; min-width: 0; padding: 6px 8px; border: 1px solid #d8d6d0; border-radius: 6px; font-size: 12.5px; color: #1A1A1A; background: #fff; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
   .ig-slide-text:focus, .ig-slide-design:focus, .ig-img-a:focus, .ig-img-b:focus { outline: none; border-color: #6c5ce7; }
+
+  /* Batch 6: X Source/Reference field */
+  .x-source-row { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 10px; }
+  .x-source-label { font-size: 12px; font-weight: 700; color: #777; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .x-source-input { width: 100%; padding: 8px 10px; border: 1px solid #d8d6d0; border-radius: 8px; font-size: 13px; color: #1A1A1A; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .x-source-input:focus { outline: none; border-color: #c0392b; }
+
+  /* Batch 6: Instagram visual option cards (A / B) */
+  .ig-opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .ig-opt-card { display: flex; gap: 8px; border: 1.5px solid #e0ddf0; border-radius: 10px; padding: 8px; background: #fff; transition: border-color .15s, box-shadow .15s, background .15s; }
+  .ig-opt-card.picked { border-color: #6c5ce7; box-shadow: 0 0 0 2px rgba(108,92,231,0.18); background: #faf9ff; }
+  .ig-opt-thumb { flex: none; width: 44px; height: 44px; border-radius: 8px; background: linear-gradient(135deg,#e8e6f7,#d6d2ef); color: #6c5ce7; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .ig-opt-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  .ig-opt-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .ig-opt-name { font-size: 11px; font-weight: 700; color: #6c5ce7; }
+  .ig-opt-pick { font-size: 11px; font-weight: 700; color: #555; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .ig-opt-pick input[type="checkbox"] { width: 16px; height: 16px; accent-color: #6c5ce7; cursor: pointer; }
+  .ig-opt-visual { width: 100%; padding: 5px 7px; border: 1px solid #d8d6d0; border-radius: 6px; font-size: 12px; color: #1A1A1A; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .ig-opt-prompt { width: 100%; padding: 5px 7px; border: 1px solid #d8d6d0; border-radius: 6px; font-size: 12px; color: #555; line-height: 1.5; resize: vertical; font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+  .ig-opt-visual:focus, .ig-opt-prompt:focus { outline: none; border-color: #6c5ce7; }
   .panel-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 12px; }
   .char-count { font-size: 12px; color: #888; font-family: ui-monospace, Menlo, Consolas, monospace; }
   .char-count.over { color: #c0392b; font-weight: 700; }
@@ -1322,6 +1342,10 @@
     .ig-slide-text, .ig-img-a, .ig-img-b { font-size: 16px; } /* Batch4: avoid iOS zoom */
     .ig-slide-design { font-size: 14px; }
     .ig-img-pick input[type="checkbox"] { width: 22px; height: 22px; }
+    /* Batch6: IG option cards stack on phone, X source/prompt 16px (avoid iOS zoom) */
+    .ig-opt-grid { grid-template-columns: 1fr; }
+    .ig-opt-visual, .ig-opt-prompt, .x-source-input { font-size: 16px; }
+    .ig-opt-pick input[type="checkbox"] { width: 20px; height: 20px; }
     .p5-copy-btn { font-size: 14px; padding: 12px 14px; }
   }
 </style>
@@ -1685,6 +1709,7 @@
   const DIST_EN_KEY = lsKey('dist_en');            // Batch2: English Preview(global rewrite)テキスト
   const DIST_IMG_KEY = lsKey('dist_images');       // Batch3: 画像案(media別の image ideas / 選択状態)
   const DIST_SLIDES_KEY = lsKey('dist_slides');    // Batch4: Instagram carousel スライド(5枚)
+  const DIST_SRC_KEY = lsKey('dist_source');       // Batch6: 媒体別 Source/Reference(出典・参考)
   const VERIFY_KEY = lsKey('verify_state');         // Phase4: 8項目チェック
   const PHASE_KEY = lsKey('active_phase'); // アクティブフェーズ
   const DIST_STATE_KEY = lsKey('dist_state'); // Phase5: 配信状態(状態/URL/更新時刻)
@@ -2068,12 +2093,12 @@
       apiEndpoint: null, publishedUrl: null
     },
     {
-      id:'x_thread', label:'X スレッド', tabLabel:'X',
-      limit:1000, limitMin:0,
-      purpose:'70:30ルール適用。速報・議論拡散。',
-      length:'5〜7投稿・各140字以内（総計 上限 1000字目安）',
-      caution:'1投稿目で結論、最終投稿で note リンク。',
-      hint:'5〜7投稿・各140字以内。1投稿目で結論、最終で note リンク。',
+      id:'x_thread', label:'X', tabLabel:'X',
+      limit:140, limitMin:0,
+      purpose:'140字弱の1投稿が主役。鋭く、続きを読みたく。',
+      length:'140字弱の Main Post（主役）。スレッドは補助。',
+      caution:'短く鋭く。全部説明せず、続きを読みたく。出典は明記。',
+      hint:'140字弱で言い切る。要約しすぎない・続きを読みたく。',
       apiEndpoint: null, publishedUrl: null
     },
     {
@@ -2152,15 +2177,11 @@
                '\n\n【問い】あなたの現場では、これはどう映るでしょうか?\n\n' + AICO_TAGS;
         break;
       case 'x_thread': {
-        // narrative thread(要約ではない): Hook → Tension/Paradox → Main(背景) → CTA(言い切らない)
-        var xs = sents.length ? sents : [title];
-        var posts = [];
-        posts.push(trimTo(xs[0], 120));                                   // ① Hook(冒頭で止める)
-        if (xs[1]) posts.push(trimTo(xs[1], 120));                        // ② Tension/Paradox(違和感・問い)
-        xs.slice(2, 7).forEach(function(s){ posts.push(trimTo(s, 120)); }); // ③ Main thread(背景)
-        while (posts.length < 4) posts.push('なぜそうなるのか——理由はひとつではない。');
-        posts.push('……ここから先は、note に書いた。(リンク)');             // ④ CTA(続きを読みたく)
-        text = posts.map(function(p, i){ return (i + 1) + '/ ' + p; }).join('\n\n') + '\n\n#AIco';
+        // Main X Post 主役: 140字弱で鋭く言い切る(全部説明しない・続きを読みたく)。
+        var xhook = sents[0] || title;
+        var xtwist = sents[1] || '';
+        var core = xhook + (xtwist ? '　' + xtwist : '');
+        text = trimTo(core, 118) + '\n\n続きはnoteで。';
         break;
       }
       case 'instagram_carousel':
@@ -2211,14 +2232,17 @@
   var sortByStatus = false;
 
   // ---- data load / save ----
+  function slidesValid(arr) { return arr && arr.length && arr[0] && typeof arr[0].optA === 'object' && arr[0].optA !== null; }
+  function imagesTyped(arr) { return arr && arr.length && arr[0] && arr[0].kind; }
   function loadDistData() {
-    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {}, slidesData = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {}, slidesData = {}, srcData = {};
     try { texts = JSON.parse(localStorage.getItem(DIST_KEY) || '{}'); } catch(e) {}
     try { statuses = JSON.parse(localStorage.getItem(DIST_STATUS_KEY) || '{}'); } catch(e) {}
     try { pubTimes = JSON.parse(localStorage.getItem(DIST_PUB_TIME_KEY) || '{}'); } catch(e) {}
     try { textsEN = JSON.parse(localStorage.getItem(DIST_EN_KEY) || '{}'); } catch(e) {}
     try { imagesData = JSON.parse(localStorage.getItem(DIST_IMG_KEY) || '{}'); } catch(e) {}
     try { slidesData = JSON.parse(localStorage.getItem(DIST_SLIDES_KEY) || '{}'); } catch(e) {}
+    try { srcData = JSON.parse(localStorage.getItem(DIST_SRC_KEY) || '{}'); } catch(e) {}
     // migrate old keys: substack_en + medium_en → substack_medium
     if (!texts['substack_medium'] && (texts['substack_en'] || texts['medium_en'])) {
       texts['substack_medium'] = (texts['substack_en'] || '') +
@@ -2228,21 +2252,23 @@
       distData[m.id] = {
         text: texts[m.id] || '',
         textEN: textsEN[m.id] || '',
-        images: (imagesData[m.id] && imagesData[m.id].length) ? imagesData[m.id] : defaultImageIdeas(m.id),
-        slides: (slidesData[m.id] && slidesData[m.id].length) ? slidesData[m.id] : defaultSlides(m.id),
+        images: imagesTyped(imagesData[m.id]) ? imagesData[m.id] : defaultImageIdeas(m.id), // Batch6: 旧形式は新3分類へ
+        slides: slidesValid(slidesData[m.id]) ? slidesData[m.id] : defaultSlides(m.id),      // Batch6: 旧shapeは新storyへ
+        source: srcData[m.id] || '',
         status: statuses[m.id] || 'draft',
         pubTime: pubTimes[m.id] || null
       };
     });
   }
   function saveDistData() {
-    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {}, slidesData = {};
+    var texts = {}, statuses = {}, pubTimes = {}, textsEN = {}, imagesData = {}, slidesData = {}, srcData = {};
     MEDIA.forEach(function(m) {
       var d = distData[m.id];
       texts[m.id] = d.text;
       if (d.textEN) textsEN[m.id] = d.textEN;
       if (d.images && d.images.length) imagesData[m.id] = d.images;
       if (d.slides && d.slides.length) slidesData[m.id] = d.slides;
+      if (d.source) srcData[m.id] = d.source;
       statuses[m.id] = d.status;
       if (d.pubTime) pubTimes[m.id] = d.pubTime;
     });
@@ -2252,6 +2278,7 @@
     try { localStorage.setItem(DIST_EN_KEY, JSON.stringify(textsEN)); } catch(e) {}
     try { localStorage.setItem(DIST_IMG_KEY, JSON.stringify(imagesData)); } catch(e) {}
     try { localStorage.setItem(DIST_SLIDES_KEY, JSON.stringify(slidesData)); } catch(e) {}
+    try { localStorage.setItem(DIST_SRC_KEY, JSON.stringify(srcData)); } catch(e) {}
   }
   // compat shims (existing code may call these)
   function saveDistOutputs() { saveDistData(); }
@@ -2401,9 +2428,9 @@
   function defaultImageIdeas(mediaId) {
     if (mediaId === 'x_thread') {
       return [
-        { label:'都市の夜景と孤独な人物（cinematic）', checked:false, url:null, prompt:null },
-        { label:'編集室のデスクとノート（editorial）', checked:false, url:null, prompt:null },
-        { label:'抽象的な光とテキストタイポグラフィ（emotional）', checked:false, url:null, prompt:null }
+        { kind:'生成案',     label:'AI画像生成案：都市の夜景と一人（cinematic documentary）', checked:false, url:null, prompt:null },
+        { kind:'自前写真案', label:'自前写真案：編集デスク/ノート等の権利クリア素材',         checked:false, url:null, prompt:null },
+        { kind:'引用元画像案', label:'引用元画像案：出典記事の図表（要・権利確認／不明なら使わない）', checked:false, url:null, prompt:null }
       ];
     }
     return [];
@@ -2415,7 +2442,7 @@
     listEl.innerHTML = ideas.map(function(it, i) {
       return '<label class="x-image-row">' +
         '<input type="checkbox" class="x-image-chk" data-i="' + i + '"' + (it.checked ? ' checked' : '') + '>' +
-        '<span class="x-image-tag">image' + (i + 1) + '</span>' +
+        '<span class="x-image-tag">' + escAttr(it.kind || ('image' + (i + 1))) + '</span>' +
         '<input type="text" class="x-image-label" data-i="' + i + '" value="' + escAttr(it.label) + '">' +
         '</label>';
     }).join('');
@@ -2425,11 +2452,21 @@
   function defaultSlides(mediaId) {
     if (mediaId !== 'instagram_carousel') return [];
     return [
-      { lang:'ja', text:'', design:'表紙 / emotional typography / 余白大（止める一言）', optA:'都市の夜景と一人（cinematic）', optB:'余白に一語（typography）', selected:null },
-      { lang:'ja', text:'', design:'問い・違和感 / editorial',                       optA:'手元のノート（editorial）',     optB:'静かな部屋の光（emotional）',  selected:null },
-      { lang:'en', text:'', design:'world view opens / Monocle tone',                optA:'global cityscape (Monocle)',    optB:'minimal data viz (editorial)', selected:null },
-      { lang:'en', text:'', design:'insight / Netflix documentary still',           optA:'documentary portrait',          optB:'abstract light + type',        selected:null },
-      { lang:'en', text:'', design:'CTA → Substack/Medium / Apple keynote closing', optA:'clean keynote slide',           optB:'single line on black',         selected:null }
+      { role:'Hook',       lang:'ja', text:'', design:'止める一言 / 強い問い・違和感・感情 / emotional typography',
+        optA:{ visual:'cinematic city night', prompt:'A solitary figure looking at a glowing smartphone in Tokyo at night, cinematic documentary style, 4:5.' },
+        optB:{ visual:'editorial typography',  prompt:'Minimal black-and-white typography with one strong Japanese phrase, Apple keynote style, lots of negative space.' }, selected:null },
+      { role:'Scene',      lang:'ja', text:'', design:'背景・状況 / note正本の文脈を短く / editorial still',
+        optA:{ visual:'living room TV glow',   prompt:'A quiet living room at night, a large TV glowing, seen from behind a sofa, documentary still.' },
+        optB:{ visual:'hands and remote',      prompt:'Close-up of hands holding a TV remote, soft warm light, editorial photography.' }, selected:null },
+      { role:'Shift',      lang:'en', text:'', design:'変化・発見 / 海外読者にも通じる視点 / Monocle tone',
+        optA:{ visual:'global cityscape',      prompt:'A modern global cityscape at dusk, clean Monocle-magazine aesthetic, wide shot.' },
+        optB:{ visual:'minimal data viz',      prompt:'Minimal editorial data visualization on off-white, one rising line, restrained design.' }, selected:null },
+      { role:'Insight',    lang:'en', text:'', design:'示唆・学び / メディア・社会・ビジネスへの含意 / Netflix documentary still',
+        optA:{ visual:'documentary portrait',  prompt:'A thoughtful person in a studio, Netflix-documentary lighting, shallow depth of field.' },
+        optB:{ visual:'abstract light + type', prompt:'Abstract beam of light over dark background with a single English line, emotional typography.' }, selected:null },
+      { role:'Aftertaste', lang:'en', text:'', design:'余韻・問い・続きへ / 言い切りすぎない / Apple keynote closing',
+        optA:{ visual:'clean keynote closing', prompt:'A clean black keynote slide with one short English sentence, Apple keynote style.' },
+        optB:{ visual:'single line on black',  prompt:'A single white English line centered on pure black, lots of negative space.' }, selected:null }
     ];
   }
   function renderIGSlides(mediaId) {
@@ -2438,41 +2475,57 @@
     var slides = distData[mediaId].slides || [];
     listEl.innerHTML = slides.map(function(s, i) {
       var len = (s.text || '').length;
+      function optCard(letter, key) {
+        var o = s[key] || {};
+        var picked = (s.selected === letter);
+        return '<div class="ig-opt-card' + (picked ? ' picked' : '') + '">' +
+          '<div class="ig-opt-thumb">' + letter + '</div>' +
+          '<div class="ig-opt-body">' +
+            '<div class="ig-opt-head"><span class="ig-opt-name">Option ' + letter + '</span>' +
+              '<label class="ig-opt-pick"><input type="checkbox" class="ig-img-sel" data-i="' + i + '" data-opt="' + letter + '"' + (picked ? ' checked' : '') + '> 採用</label></div>' +
+            '<input type="text" class="ig-opt-visual" data-i="' + i + '" data-opt="' + key + '" placeholder="Visual direction" value="' + escAttr(o.visual || '') + '">' +
+            '<textarea class="ig-opt-prompt" data-i="' + i + '" data-opt="' + key + '" rows="2" placeholder="Prompt / image idea">' + escAttr(o.prompt || '') + '</textarea>' +
+          '</div>' +
+        '</div>';
+      }
       return '<div class="ig-slide">' +
         '<div class="ig-slide-head">' +
-          '<span class="ig-slide-no">Slide ' + (i + 1) + '</span>' +
+          '<span class="ig-slide-no">Slide ' + (i + 1) + (s.role ? ' · ' + s.role : '') + '</span>' +
           '<span class="ig-slide-lang ' + (s.lang === 'en' ? 'en' : 'ja') + '">' + (s.lang === 'en' ? 'English' : '日本語') + '</span>' +
           '<span class="ig-slide-cc' + (len > 50 ? ' over' : '') + '">' + len + '/50</span>' +
         '</div>' +
-        '<textarea class="ig-slide-text" data-i="' + i + '" rows="2" placeholder="Slide ' + (i + 1) + ' のテキスト（〜50字目安・止める一言）">' + escAttr(s.text || '') + '</textarea>' +
+        '<textarea class="ig-slide-text" data-i="' + i + '" rows="2" placeholder="Slide ' + (i + 1) + ' のテキスト（〜50字目安・視覚主導）">' + escAttr(s.text || '') + '</textarea>' +
         '<input type="text" class="ig-slide-design" data-i="' + i + '" placeholder="Design Direction" value="' + escAttr(s.design || '') + '">' +
-        '<div class="ig-img-opt"><label class="ig-img-pick"><input type="checkbox" class="ig-img-sel" data-i="' + i + '" data-opt="A"' + (s.selected === 'A' ? ' checked' : '') + '> A</label>' +
-          '<input type="text" class="ig-img-a" data-i="' + i + '" placeholder="Option A image" value="' + escAttr(s.optA || '') + '"></div>' +
-        '<div class="ig-img-opt"><label class="ig-img-pick"><input type="checkbox" class="ig-img-sel" data-i="' + i + '" data-opt="B"' + (s.selected === 'B' ? ' checked' : '') + '> B</label>' +
-          '<input type="text" class="ig-img-b" data-i="' + i + '" placeholder="Option B image" value="' + escAttr(s.optB || '') + '"></div>' +
+        '<div class="ig-opt-grid">' + optCard('A', 'optA') + optCard('B', 'optB') + '</div>' +
       '</div>';
     }).join('');
   }
 
-  // Batch 2: English Preview = global rewrite の下書き種(直訳ではない)。媒体トーン別の英語スキャフォルド + JP参照。
+  // Batch 6: English Preview = global rewrite。直訳でなく英語のみの構造化スキャフォルド(日本語本文は載せない)。将来API用に buildMediaText とは別関数。
   function buildEnScaffold(m, jpText) {
-    var ref = (jpText || '').replace(/\s+/g, ' ').trim();
-    var refBlock = '\n\n— — — reference: Japanese source — — —\n' +
-      (ref || '(Phase 2 の本文から「⚡ 6媒体に変換」で生成されます)');
     var head, frame;
     if (m.id === 'linkedin_en') {
-      head = '[English global rewrite — LinkedIn · executive / media-strategist tone]\n' +
-             '(Not a translation. Rewrite for a global business audience. Conclusion-first, insight-driven, minimal self-intro.)';
-      frame = '\n\nHook (1–2 lines, lead with the conclusion):\n…\n\nWhy it matters (operator / executive insight):\n…\n\nSo what / CTA:\n…\n\n#hashtags';
+      head = '[Global Rewrite Draft — LinkedIn] · AI global rewrite pending\n' +
+             'Executive tone / media strategy / conclusion-first. Rewrite (do not translate) for a global business audience.';
+      frame = '\n\nOpening insight:\nA quiet but decisive shift is reshaping how audiences consume media.\n\n' +
+              'Business context:\n…\n\n' +
+              'Media / platform implication:\n…\n\n' +
+              'Personal point of view:\n…\n\n' +
+              'Closing question / CTA:\nWhat would you do if your most valuable audience moved first?\n\n#media #strategy';
     } else if (m.id === 'substack_medium') {
-      head = '[English global rewrite — Substack (essay/reflective) + Medium (global-media column) tone]\n' +
-             '(Not a translation. A reader essay: personal perspective + a clear argument that travels across borders.)';
-      frame = '\n\nOpening (a reflective hook that pulls the reader in):\n…\n\nThe idea (your perspective, with one concrete scene):\n…\n\nThe argument (why this matters globally):\n…\n\nClose (a thought that lingers):\n…';
+      head = '[Global Rewrite Draft — Substack / Medium] · AI global rewrite pending\n' +
+             'Essay tone / reflective / global media perspective. Rewrite (do not translate) for international readers.';
+      frame = '\n\nEssay title:\n…\n\n' +
+              'Opening scene:\nA quiet evening, a glowing screen, and a habit no one decided on purpose.\n\n' +
+              'Core observation:\n…\n\n' +
+              'Personal reflection:\n…\n\n' +
+              'Global media perspective:\n…\n\n' +
+              'Closing paragraph:\n…';
     } else {
-      head = '[English global rewrite — global media tone]\n(Not a translation. Rewrite for an international audience.)';
-      frame = '\n\n…';
+      head = '[Global Rewrite Draft] · AI global rewrite pending\nRewrite (do not translate) for an international audience.';
+      frame = '\n\nOpening:\n…\n\nCore idea:\n…\n\nClosing:\n…';
     }
-    return head + frame + refBlock;
+    return head + frame;
   }
 
   function openEditor(mediaId) {
@@ -2496,9 +2549,8 @@
 
     // Batch 4: Instagram は carousel を主役に。caption は下部の補助欄として温存。
     var igPanels = (m.id === 'instagram_carousel') ?
-      ('<div class="ig-guide"><strong>Instagram Carousel</strong> — 読ませるより<strong>止める</strong>／説明より<strong>印象</strong>。caption ではなく carousel narrative。日本語2枚で感情をつかみ、英語3枚で世界観を広げる。<br>' +
-        '<span class="ig-aes">aesthetic: Apple keynote · Netflix documentary · Monocle · editorial · emotional typography</span></div>' +
-      '<div class="ig-script-label">📐 Instagram Carousel Script（主役 / 各スライド〜50字目安）</div>' +
+      ('<div class="ig-guide">5 slides. One story. Visual-first, emotionally edited from the note.</div>' +
+      '<div class="ig-script-label">📐 Instagram Carousel — 5 slides / one story（Hook → Scene → Shift → Insight → Aftertaste）</div>' +
       '<div id="ig-slide-list" class="ig-slide-list"></div>' +
       '<div class="ig-caption-label">↓ 補助: caption（任意）</div>') : '';
 
@@ -2526,9 +2578,10 @@
         '<textarea class="media-output" id="editor-textarea-en" style="display:none;"' +
           ' placeholder="English global rewrite（直訳ではない）。トーンに沿って英語で書く / Claude の生成を貼る。"></textarea>' : '') +
       (m.id === 'x_thread' ?
-        '<div class="x-guide"><strong>X narrative thread</strong>（要約ではなく「続きを読みたくさせる」入口）<br>' +
-          '① Hook（冒頭で止める）→ ② Tension / Paradox（違和感・問い）→ ③ Main thread（5〜7投稿で背景）→ ④ CTA（note へ誘導・言い切らない）</div>' +
-        '<div class="x-images"><div class="x-images-label">🖼 Image Ideas（画像生成・選択用 / 現在は placeholder・将来 API 接続）</div>' +
+        '<div class="x-guide"><strong>X — Main Post（主役）</strong>：140字弱で鋭く言い切る。全部説明せず、続きを読みたく。スレッドは補助。</div>' +
+        '<label class="x-source-row"><span class="x-source-label">📎 Source / Reference（出典・参考）</span>' +
+          '<input type="text" id="x-source" class="x-source-input" placeholder="例：参考：Deloitte 2026 M&amp;E Outlook / Streaming Media YIR 2026"></label>' +
+        '<div class="x-images"><div class="x-images-label">🖼 Image / Photo Candidate（生成案 / 自前写真案 / 引用元画像案）</div>' +
           '<div id="x-image-list"></div></div>' : '') +
       '<div class="editor-foot">' +
         '<span class="char-count" id="editor-cc">0 字 / 上限 ' + m.limit + '</span>' +
@@ -2566,7 +2619,10 @@
 
     // Batch 2: bilingual 媒体は EN(global rewrite)タブを追加
     if (m.bilingual && taEN) {
-      if (!distData[mediaId].textEN) distData[mediaId].textEN = buildEnScaffold(m, d.text); // 初回のみ種を投入
+      if (!distData[mediaId].textEN || /reference: Japanese source/.test(distData[mediaId].textEN)) {
+        distData[mediaId].textEN = buildEnScaffold(m, d.text); // Batch6: 空 or 旧JP混じり種を英語スキャフォルドへ更新
+        saveDistData();
+      }
       taEN.value = distData[mediaId].textEN;
       taEN.addEventListener('input', function() {
         distData[mediaId].textEN = taEN.value;
@@ -2587,6 +2643,11 @@
 
     // Batch 3: X 画像案UI(チェック選択 + ラベル編集) — 将来API用に data 構造を保持
     if (m.id === 'x_thread') {
+      var xSrc = document.getElementById('x-source');
+      if (xSrc) {
+        xSrc.value = distData[mediaId].source || '';
+        xSrc.addEventListener('input', function() { distData[mediaId].source = xSrc.value; saveDistData(); });
+      }
       renderXImages(mediaId);
       var xImgList = document.getElementById('x-image-list');
       if (xImgList) {
@@ -2615,18 +2676,22 @@
             var ccx = t.parentNode.querySelector('.ig-slide-cc');
             if (ccx) { ccx.textContent = t.value.length + '/50'; ccx.classList.toggle('over', t.value.length > 50); }
           } else if (t.classList.contains('ig-slide-design')) { s.design = t.value; }
-          else if (t.classList.contains('ig-img-a')) { s.optA = t.value; }
-          else if (t.classList.contains('ig-img-b')) { s.optB = t.value; }
+          else if (t.classList.contains('ig-opt-visual')) { var k = t.dataset.opt; if (!s[k]) s[k] = {}; s[k].visual = t.value; }
+          else if (t.classList.contains('ig-opt-prompt')) { var k2 = t.dataset.opt; if (!s[k2]) s[k2] = {}; s[k2].prompt = t.value; }
           else return;
           saveDistData();
         });
         igList.addEventListener('change', function(e) {
           var chk = e.target.closest('.ig-img-sel'); if (!chk) return;
-          var i = +chk.dataset.i; var s = distData[mediaId].slides[i];
+          var i = +chk.dataset.i; var s = distData[mediaId].slides[i]; var letter = chk.dataset.opt;
+          var slideEl = chk.closest('.ig-slide');
           if (chk.checked) {
-            s.selected = chk.dataset.opt;
-            Array.prototype.forEach.call(chk.closest('.ig-slide').querySelectorAll('.ig-img-sel'), function(o) { if (o !== chk) o.checked = false; });
+            s.selected = letter;
+            Array.prototype.forEach.call(slideEl.querySelectorAll('.ig-img-sel'), function(o) { if (o !== chk) o.checked = false; });
           } else { s.selected = null; }
+          Array.prototype.forEach.call(slideEl.querySelectorAll('.ig-opt-card'), function(card, idx) {
+            card.classList.toggle('picked', s.selected === (idx === 0 ? 'A' : 'B'));
+          });
           saveDistData();
         });
       }
