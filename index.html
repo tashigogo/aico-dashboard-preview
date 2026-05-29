@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- build v18 -->
+<!-- build v19 -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIco 6媒体プロンプト生成</title>
+<title>AIco note → 6媒体 ワークフロー</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -23,15 +23,40 @@
   h1 {
     font-size: 20px;
     font-weight: 600;
-    margin: 0 0 24px;
+    margin: 0 0 28px;
   }
   h1 .accent { color: #e63946; }
 
+  .step {
+    border: 1px solid #232323;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 22px;
+    background: #131313;
+  }
+  .step-h {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .step-n {
+    background: #e63946;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
   .label {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    margin: 0 0 8px;
+    margin: 0 0 7px;
     color: #f0f0f0;
   }
 
@@ -41,21 +66,40 @@
     color: #f0f0f0;
     border: 1px solid #2c2c2c;
     border-radius: 8px;
-    padding: 14px;
+    padding: 13px;
     font-family: system-ui, -apple-system, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
     resize: vertical;
   }
   textarea:focus { outline: none; border-color: #e63946; }
+  textarea.ro { background: #0d0d0d; color: #d6d6d6; font-size: 13px; }
 
+  #topics { min-height: 160px; }
+  #selected { min-height: 80px; }
   #honmon { min-height: 300px; }
+
+  .block { margin-bottom: 14px; }
+  .block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #8a8a8a;
+    margin: 8px 0 18px;
+  }
+  .hint:last-child { margin-bottom: 0; }
 
   .counter {
     text-align: right;
     font-size: 12px;
     color: #888;
-    margin: 6px 0 24px;
+    margin: 6px 0 0;
   }
 
   .gen-btn {
@@ -74,39 +118,25 @@
   .gen-btn:hover { background: #cf2f3c; }
   .gen-btn:active { transform: translateY(1px); }
 
-  #results { margin-top: 32px; }
+  #results { margin-top: 22px; }
   #results.hidden { display: none; }
 
   .card {
-    background: #161616;
+    background: #0f0f0f;
     border: 1px solid #2c2c2c;
     border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
   }
-  .card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .card-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #e63946;
-  }
-  .card textarea {
-    min-height: 150px;
-    font-size: 13px;
-    background: #0f0f0f;
-  }
+  .card-name { font-size: 15px; font-weight: 600; color: #e63946; }
+  .card textarea { min-height: 150px; font-size: 13px; background: #0d0d0d; }
+
   .copy-btn {
     background: transparent;
     color: #f0f0f0;
     border: 1px solid #444;
     border-radius: 6px;
-    padding: 8px 14px;
+    padding: 7px 13px;
     font-size: 13px;
     font-family: inherit;
     cursor: pointer;
@@ -117,7 +147,7 @@
   .copy-btn.copied { border-color: #2e9e4f; color: #5fd07f; }
 
   footer {
-    margin-top: 40px;
+    margin-top: 36px;
     text-align: center;
     font-size: 11px;
     color: #555;
@@ -126,58 +156,217 @@
   @media (max-width: 480px) {
     h1 { font-size: 18px; }
     .wrap { padding: 20px 12px 56px; }
+    .step { padding: 16px 13px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1><span class="accent">AIco</span> 6媒体プロンプト生成</h1>
+  <h1><span class="accent">AIco</span> note → 6媒体 ワークフロー</h1>
 
-  <label class="label" for="honmon">note正本</label>
-  <textarea id="honmon" placeholder="ここに note 正本を貼り付け / 入力"></textarea>
-  <div class="counter"><span id="count">0</span> 文字</div>
+  <!-- ===== STEP 0 ===== -->
+  <section class="step">
+    <div class="step-h"><span class="step-n">Step 0</span> トピック取得</div>
 
-  <button class="gen-btn" id="generate">🚀 6媒体プロンプト生成</button>
+    <div class="block">
+      <div class="block-head">
+        <span class="label">① 今週のトピック10本プロンプト</span>
+        <button class="copy-btn" data-copy="p-topics" data-label="コピー">コピー</button>
+      </div>
+      <textarea id="p-topics" class="ro" readonly></textarea>
+    </div>
+    <p class="hint">→ Claudeに貼る → 返ってきた10本を下に貼る → 1本選ぶ</p>
 
-  <div id="results" class="hidden"></div>
+    <label class="label" for="topics">② 返ってきた10本を貼る</label>
+    <textarea id="topics" placeholder="Claudeが返した10本をここに貼り付け"></textarea>
 
-  <footer>AIco · prompt generator · v18</footer>
+    <label class="label" for="selected" style="margin-top:16px;">③ 選んだ1本（このテーマでドラフトを書く）</label>
+    <textarea id="selected" placeholder="10本から選んだ1本をここに貼る／書く"></textarea>
+  </section>
+
+  <!-- ===== STEP 1 ===== -->
+  <section class="step">
+    <div class="step-h"><span class="step-n">Step 1</span> ドラフト生成</div>
+
+    <div class="block">
+      <div class="block-head">
+        <span class="label">選んだトピックのドラフト生成プロンプト（自動反映）</span>
+        <button class="copy-btn" data-copy="p-draft" data-label="コピー">コピー</button>
+      </div>
+      <textarea id="p-draft" class="ro" readonly></textarea>
+    </div>
+    <p class="hint">→ Claudeに貼る → 1,500字ドラフトが返る → 下の正本欄に貼る</p>
+  </section>
+
+  <!-- ===== STEP 1–2: 正本 ===== -->
+  <section class="step">
+    <div class="step-h"><span class="step-n">Step 1–2</span> note正本（貼り付け／音声修正）</div>
+
+    <label class="label" for="honmon">note正本</label>
+    <textarea id="honmon" placeholder="ここに 1,500字ドラフトを貼り付け → Win+H で音声修正"></textarea>
+    <div class="counter"><span id="count">0</span> 文字</div>
+    <p class="hint">音声修正：原稿欄をクリック → Win+H で音声入力</p>
+  </section>
+
+  <!-- ===== STEP 3 ===== -->
+  <section class="step">
+    <div class="step-h"><span class="step-n">Step 3</span> 6媒体プロンプト生成</div>
+    <button class="gen-btn" id="generate">🚀 6媒体プロンプト生成</button>
+    <div id="results" class="hidden"></div>
+  </section>
+
+  <footer>AIco · note→6媒体 workflow · v19</footer>
 </div>
 
 <script>
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "aico_note_honmon";
-  var honmon = document.getElementById("honmon");
-  var count = document.getElementById("count");
-  var results = document.getElementById("results");
-  var genBtn = document.getElementById("generate");
+  // ---- elements ----
+  var honmon   = document.getElementById("honmon");
+  var count    = document.getElementById("count");
+  var topics   = document.getElementById("topics");
+  var selected = document.getElementById("selected");
+  var pTopics  = document.getElementById("p-topics");
+  var pDraft   = document.getElementById("p-draft");
+  var results  = document.getElementById("results");
+  var genBtn   = document.getElementById("generate");
 
-  // ---- restore from localStorage ----
-  try {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) honmon.value = saved;
-  } catch (e) {}
+  // ---- localStorage keys ----
+  var KEY_HONMON   = "aico_note_honmon";
+  var KEY_TOPICS   = "aico_topics";
+  var KEY_SELECTED = "aico_selected_topic";
 
-  function updateCount() {
-    count.textContent = honmon.value.length;
+  function load(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
   }
+  function save(key, val) {
+    try { localStorage.setItem(key, val); } catch (e) {}
+  }
+
+  // ---- Step 0: 今週のトピック10本プロンプト ----
+  var TOPICS_PROMPT =
+    "あなたはAIcoのanalystです。今週のnote発信に向けて、記事案を10本生成してください。\n\n" +
+    "【AIcoとは】\n" +
+    "城田信義（TOKYO MX編成局長 × 中小企業診断士）の経営知を、グローバル投資家の視点で発信する個人ブランド。放送×通信・配信のメディアミックスで、日本の資源・IP・地方・文化を世界市場で再定義する。\n\n" +
+    "【リサーチ範囲】\n" +
+    "直近1〜2週間のグローバルトレンドから抽出する：\n" +
+    "- グローバルの映像・メディア・ストリーミング業界\n" +
+    "- AIとコンテンツ製作（ハリウッド／制作経済学／肖像権）\n" +
+    "- アニメ・マンガの世界市場（Netflix / Crunchyroll 等）\n" +
+    "- K-pop / J-pop とグローバル音楽ストリーミング\n" +
+    "- 日本IPのライセンシングとグローバル資本\n" +
+    "- 製作委員会、YouTube、AI製作の経済学 など城田の関心領域\n\n" +
+    "【記事案10本：各案に必須の6項目】\n" +
+    "1. タイトル候補（フック、35〜50字）\n" +
+    "2. Five Stars紐付け（①世界ニーズ抽出／②日本資源の価値再定義／③ROIC最大化／④キャッシュ創出／⑤実行可能性開拓 のうち1〜2つ）\n" +
+    "3. なぜ今（2026年の文脈、3〜4行）\n" +
+    "4. 300字要約\n" +
+    "5. Sources（URL付き、複数可）\n" +
+    "6. 信頼度（高／中／低）\n\n" +
+    "【品質基準】\n" +
+    "- 数値には取得日・出典・信頼度を付ける\n" +
+    "- 事実／推定／未確認を区別する\n" +
+    "- 10本のうち最低3本は「TV局長視点 × 診断士視点」が掛け算で効くもの\n" +
+    "- 最後にanalyst推奨トップ3を順位付きで提示\n\n" +
+    "【出力形式】\n" +
+    "1〜10の番号付きで、各案を上記6項目で簡潔に。読んで1本選べる状態にする。前置き不要。";
+
+  // ---- Step 1: ドラフト生成プロンプト（選択トピックを注入） ----
+  function buildDraftPrompt(topic) {
+    var t = (topic && topic.trim()) ? topic.trim() : "（Step 0 で選んだトピックをここに）";
+    return "あなたはAIcoのeditorです。以下のテーマで note 用の日本語論考を執筆してください。\n\n" +
+      "【テーマ】\n" + t + "\n\n" +
+      "【執筆要件】\n" +
+      "- 文字数：1,500字程度（±200字）\n" +
+      "- 言語：日本語\n" +
+      "- voice：AIco（AI-native、グローバル投資家視点、TOKYO MX編成局長×中小企業診断士の一次情報を編み込む）\n" +
+      "- 文体：知的だが読みやすい、未来のクリエイターに語りかけるメディアエグゼクティブのトーン\n" +
+      "- 構成：導入 → 構造的分析 → 日本への含意 → 実行可能な示唆（4段落程度）\n" +
+      "- 本文中に【ここに城田の生コメント挿入】マーカーを3箇所配置\n" +
+      "- AI言語比率は30%以下（「〜である」「〜と言える」の多用を避ける）\n" +
+      "- マークダウン記法は使わず、プレーンな日本語の段落\n\n" +
+      "前置きや「以下に〜」のような導入文は不要。本文だけを出力。";
+  }
+
+  function autosize(el) {
+    el.style.height = "auto";
+    el.style.height = (el.scrollHeight + 2) + "px";
+  }
+
+  // ---- restore ----
+  var sH = load(KEY_HONMON);   if (sH !== null) honmon.value = sH;
+  var sT = load(KEY_TOPICS);   if (sT !== null) topics.value = sT;
+  var sS = load(KEY_SELECTED); if (sS !== null) selected.value = sS;
+
+  pTopics.value = TOPICS_PROMPT;
+  pDraft.value = buildDraftPrompt(selected.value);
+
+  function updateCount() { count.textContent = honmon.value.length; }
   updateCount();
 
+  // autosize readonly prompts after they are in the DOM
+  autosize(pTopics);
+  autosize(pDraft);
+
+  // ---- listeners ----
   honmon.addEventListener("input", function () {
     updateCount();
-    try { localStorage.setItem(STORAGE_KEY, honmon.value); } catch (e) {}
+    save(KEY_HONMON, honmon.value);
+  });
+  topics.addEventListener("input", function () {
+    save(KEY_TOPICS, topics.value);
+  });
+  selected.addEventListener("input", function () {
+    save(KEY_SELECTED, selected.value);
+    pDraft.value = buildDraftPrompt(selected.value);
+    autosize(pDraft);
   });
 
-  // ---- 6 media prompt templates ----
-  // {HONMON} is replaced with the current 正本 text.
+  // ---- copy helpers ----
+  function flash(btn) {
+    var original = btn.getAttribute("data-label");
+    btn.textContent = "✅ Copied!";
+    btn.classList.add("copied");
+    setTimeout(function () {
+      btn.textContent = original;
+      btn.classList.remove("copied");
+    }, 1500);
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  function copyText(text, btn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { flash(btn); })
+        .catch(function () { fallbackCopy(text); flash(btn); });
+    } else {
+      fallbackCopy(text);
+      flash(btn);
+    }
+  }
+
+  // wire static copy buttons (data-copy = source textarea id)
+  var copyButtons = document.querySelectorAll(".copy-btn[data-copy]");
+  Array.prototype.forEach.call(copyButtons, function (btn) {
+    btn.addEventListener("click", function () {
+      var src = document.getElementById(btn.getAttribute("data-copy"));
+      if (src) copyText(src.value, btn);
+    });
+  });
+
+  // ---- Step 3: 6 media prompts ----
   var MEDIA = [
     {
       name: "note",
-      build: function (h) {
-        return "【note正本】\n" + h;
-      }
+      build: function (h) { return "【note正本】\n" + h; }
     },
     {
       name: "X（Twitter）",
@@ -248,38 +437,6 @@
     }
   ];
 
-  function copyText(text, btn) {
-    function done() {
-      var original = btn.getAttribute("data-label");
-      btn.textContent = "✅ Copied!";
-      btn.classList.add("copied");
-      setTimeout(function () {
-        btn.textContent = original;
-        btn.classList.remove("copied");
-      }, 1500);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(function () {
-        fallbackCopy(text);
-        done();
-      });
-    } else {
-      fallbackCopy(text);
-      done();
-    }
-  }
-
-  function fallbackCopy(text) {
-    var ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand("copy"); } catch (e) {}
-    document.body.removeChild(ta);
-  }
-
   function render() {
     var h = honmon.value;
     results.innerHTML = "";
@@ -290,7 +447,7 @@
       card.className = "card";
 
       var head = document.createElement("div");
-      head.className = "card-head";
+      head.className = "block-head";
 
       var name = document.createElement("span");
       name.className = "card-name";
@@ -309,13 +466,13 @@
       ta.readOnly = true;
       ta.value = prompt;
 
-      btn.addEventListener("click", function () {
-        copyText(ta.value, btn);
-      });
+      btn.addEventListener("click", function () { copyText(ta.value, btn); });
 
       card.appendChild(head);
       card.appendChild(ta);
       results.appendChild(card);
+
+      autosize(ta);
     });
     results.classList.remove("hidden");
   }
