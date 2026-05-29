@@ -2201,7 +2201,7 @@
     gridEl.addEventListener('click', async function(e) {
       var editBtn = e.target.closest('.card-edit-btn');
       var copyBtn = e.target.closest('.card-copy-btn');
-      var pubBtn  = e.target.closest('.card-pub-btn');
+      // Batch 1b: Phase 3 カードの発信操作は廃止(編集・コピーのみ)。発信管理は Phase 5 に集約。
       if (editBtn) { openEditor(editBtn.dataset.media); return; }
       if (copyBtn && !copyBtn.disabled) {
         var mid = copyBtn.dataset.media;
@@ -2209,12 +2209,9 @@
         if (!txt.trim()) { showToast('この媒体はまだ空です。', 'warn', 2000); return; }
         try {
           await navigator.clipboard.writeText(txt);
-          showToast('📄 コピーしました。コピーして手動投稿してください。', null, 2200);
+          showToast('📄 コピーしました。投稿管理は Phase 5 で行えます。', null, 2200);
         } catch(err) { showToast('⚠ コピー失敗。', 'error', 3000); }
         return;
-      }
-      if (pubBtn && !pubBtn.classList.contains('is-published')) {
-        publishMedia(pubBtn.dataset.media);
       }
     });
   }
@@ -2228,18 +2225,17 @@
     var charLen = d.text.length;
     var barPct  = m.limit > 0 ? Math.min(100, Math.round(charLen / m.limit * 100)) : 0;
     var isOver  = charLen > m.limit;
-    var st      = isEmpty ? 'empty' : d.status;
+    // Batch 1b: Phase 3 カードは編集・コピーに専念。published は Phase 5 管轄のため
+    // カード上は ready(発信準備OK) として表示し「発信済み」を出さない(内部状態 d.status は保持)。
+    var st      = isEmpty ? 'empty' : (d.status === 'published' ? 'ready' : d.status);
     var preview = isEmpty ? '(まだ空)' : d.text.replace(/\s+/g, ' ').slice(0, 60);
     var isSelected = currentEditorMedia === mediaId;
-    card.className = 'media-card' +
-      (d.status === 'published' ? ' st-published' : '') +
-      (isSelected ? ' selected' : '');
+    card.className = 'media-card' + (isSelected ? ' selected' : '');
     card.innerHTML =
       '<div class="card-header">' +
         '<span class="card-name">' + (m.tabLabel || m.label) + '</span>' +
         '<span class="card-badge st-' + st + '">' + (STATUS_LABELS[st] || st) + '</span>' +
       '</div>' +
-      (d.status === 'published' ? '<div class="card-stamp">★ 発信済み</div>' : '') +
       '<div class="card-meter">' +
         '<div class="card-bar-bg"><div class="card-bar-fill' + (isOver ? ' over' : '') +
           '" style="width:' + barPct + '%"></div></div>' +
@@ -2251,11 +2247,7 @@
       '<div class="card-actions">' +
         '<button type="button" class="card-edit-btn" data-media="' + mediaId + '">✏️ 編集</button>' +
         '<button type="button" class="card-copy-btn" data-media="' + mediaId + '"' +
-          (isEmpty ? ' disabled title="本文が空です"' : ' title="コピーして手動投稿"') + '>📄 コピー</button>' +
-        '<button type="button" class="card-pub-btn' + (d.status === 'published' ? ' is-published' : '') +
-          '" data-media="' + mediaId + '">' +
-          (d.status === 'published' ? '★ 発信済み' : '📤 発信済みにする') +
-        '</button>' +
+          (isEmpty ? ' disabled title="本文が空です"' : ' title="コピー（投稿管理は Phase 5）"') + '>📄 コピー</button>' +
       '</div>';
   }
   function sortGrid() {
@@ -2334,18 +2326,20 @@
     currentEditorMedia = mediaId;
     MEDIA.forEach(function(mx) { updateCard(mx.id); }); // refresh selected state
 
+    // Batch 1b: 'published' は Phase 3 編集画面から除外(発信は Phase 5)。published は ready 表示にマップ。
+    var dispStatus = (d.status === 'published' ? 'ready' : d.status);
     var stOpts = [
       ['draft','下書き'], ['reviewing','確認中'],
-      ['waiting_verifier','verifier待ち'], ['ready','発信準備OK'], ['published','発信済み']
+      ['waiting_verifier','verifier待ち'], ['ready','発信準備OK']
     ].map(function(o) {
-      return '<option value="' + o[0] + '"' + (d.status === o[0] ? ' selected' : '') +
+      return '<option value="' + o[0] + '"' + (dispStatus === o[0] ? ' selected' : '') +
         '>' + o[1] + '</option>';
     }).join('');
 
     zoneEl.innerHTML =
       '<div class="editor-header">' +
         '<span class="editor-title">' + m.label + '（編集中）</span>' +
-        '<select class="status-select st-' + d.status + '" id="editor-status-select">' +
+        '<select class="status-select st-' + dispStatus + '" id="editor-status-select">' +
           stOpts + '</select>' +
         '<button type="button" class="editor-close-btn" id="editor-close-btn">× 閉じる</button>' +
       '</div>' +
@@ -2360,9 +2354,6 @@
         '<span class="char-count" id="editor-cc">0 字 / 上限 ' + m.limit + '</span>' +
         '<div class="editor-foot-right">' +
           '<button type="button" class="copy-btn" id="editor-copy-btn">📄 コピー</button>' +
-          '<button type="button" class="editor-pub-btn" id="editor-pub-btn">' +
-            (d.status === 'published' ? '★ 発信済み' : '📤 発信済みにする') +
-          '</button>' +
         '</div>' +
       '</div>';
 
@@ -2385,8 +2376,6 @@
     sel.addEventListener('change', function() {
       distData[mediaId].status = sel.value;
       sel.className = 'status-select st-' + sel.value;
-      var pb = document.getElementById('editor-pub-btn');
-      if (pb) pb.textContent = sel.value === 'published' ? '★ 発信済み' : '📤 発信済みにする';
       updateCard(mediaId);
       updateProgress();
       updateWarning();
@@ -2404,9 +2393,7 @@
         showToast('⚠ コピー失敗。コンソールに出力しました。', 'error', 4000);
       }
     });
-    document.getElementById('editor-pub-btn').addEventListener('click', function() {
-      publishMedia(mediaId);
-    });
+    // Batch 1b: 編集画面の発信ボタンは廃止(発信は Phase 5)。publishMedia は一括発信/Phase5 で使用継続。
 
     zoneEl.style.display = '';
     zoneEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
