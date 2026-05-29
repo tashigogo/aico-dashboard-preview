@@ -12,7 +12,7 @@
     color: #1A1A1A;
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Mincho ProN", "Yu Mincho", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
     -webkit-font-smoothing: antialiased;
-    padding-bottom: 33vh; /* Phase 2: reserve lower third for control bar (manuscript gets ~2/3) */
+    padding-bottom: 30vh; /* Phase 2: reserve ~30% for control bar; manuscript gets ~70% */
   }
 
   /* ---- Header ---- */
@@ -92,8 +92,9 @@
     word-break: break-all;
     overflow-wrap: break-word;
   }
-  /* Phase 2: manuscript reading area is the star (≈ upper two-thirds) */
-  body.p2 main { min-height: 60vh; }
+  /* ① Phase 2: manuscript reading area is the star (PC ≈ 70%) */
+  body.p2 main { min-height: 68vh; }
+  @media (max-width: 1024px) { body.p2 main { min-height: 60vh; } } /* iPad */
 
   /* ---- Sticky control bar ---- */
   .control-bar {
@@ -101,9 +102,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 33vh;            /* Phase 2: controls ≈ lower third */
-    min-height: 200px;
-    max-height: 340px;
+    height: 30vh;            /* Phase 2: controls ≈ lower 30% */
+    min-height: 190px;
+    max-height: 320px;
     display: flex;
     align-items: stretch;
     background: rgba(255, 255, 255, 0.97);
@@ -132,10 +133,44 @@
   }
   .control-row1 {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: nowrap;
   }
+  .control-row1 > button {          /* ① 4 buttons in one row (PC/iPad) */
+    flex: 1 1 0;
+    min-width: 0;
+    height: 52px;
+    font-size: 13.5px;
+    padding: 0 8px;
+    white-space: nowrap;
+  }
+  .memo-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .memo-label {
+    font-size: 12px;
+    color: #888;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  .reflect-btn {
+    background: #fff;
+    color: #c0392b;
+    border: 1.5px solid #c0392b;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 17px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    transition: background 0.15s;
+  }
+  .reflect-btn:hover { background: #fdecea; }
   .mic-btn {
     background: #c0392b;
     border: none;
@@ -462,23 +497,22 @@
     main h2 { font-size: 17.5px; }
     main h3 { font-size: 15.5px; }
 
-    /* ---- compact control bar (Phase 2 only) ---- */
-    .control-bar { padding: 8px 12px 10px; height: 40vh; min-height: 228px; max-height: 320px; }
+    /* ---- compact control bar (Phase 2 only) — iPhone: 2x2 button grid ---- */
+    .control-bar { padding: 8px 12px 10px; height: 42vh; min-height: 240px; max-height: 340px; }
     .control-inner { gap: 8px; }
-    .control-row1 { gap: 8px; }
-    .mic-btn { order: 1; flex: 1 0 100%; height: 50px; min-width: 0; font-size: 15.5px; }
-    .status { order: 2; flex: 1 0 100%; text-align: center; font-size: 12.5px; }
-    .clear-btn, .export-btn, .send-btn {
-      flex: 1 1 0; min-width: 0; height: 46px; padding: 0 8px;
-      font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .clear-btn { order: 3; } .export-btn { order: 4; } .send-btn { order: 5; }
+    .control-row1 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }   /* ① iPhone 2x2 */
+    .control-row1 > button { flex: none; height: 48px; min-width: 0; font-size: 13px; padding: 0 6px; }
+    .status { text-align: center; font-size: 12.5px; }
     .lbl-full { display: none; }   /* swap to short labels on mobile */
     .lbl-short { display: inline; }
-    .memo-area { flex: 1 1 auto; height: auto; min-height: 56px; font-size: 16px; } /* 16px = avoid iOS focus zoom */
+    .memo-toolbar { flex-wrap: wrap; gap: 6px; }
+    .memo-label { font-size: 11px; }
+    .reflect-btn { height: 36px; }
+    body.p2 main { min-height: 50vh; }   /* ① iPhone manuscript ≈ 50% */
+    .memo-area { flex: 1 1 auto; height: auto; min-height: 52px; font-size: 16px; } /* 16px = avoid iOS focus zoom */
 
-    body { padding-bottom: 40vh; } /* match mobile control bar; manuscript gets the rest */
-    .toast { bottom: calc(40vh + 14px); }
+    body { padding-bottom: 42vh; } /* match mobile control bar; manuscript gets the rest */
+    .toast { bottom: calc(42vh + 14px); }
     .control-hint { font-size: 11.5px; }
     .version-toggle { top: 52px; right: 8px; } /* sits just under phase-nav */
     .ver-btn { padding: 8px 11px; font-size: 11.5px; }
@@ -1255,11 +1289,9 @@
   <button type="button" class="phase-btn" data-phase="5"><span class="pnum">5</span><span class="ptext">配信</span></button>
 </nav>
 
-<!-- ===== トライアル注意書き + AIco ブランドガードレール(全フェーズ常時表示) ===== -->
-<div class="guardrail-bar" role="note" aria-label="トライアル注意書き / AIco ブランドガードレール">
-  <span class="gr-badge">🧪 TRIAL · AIco</span>
-  <span class="gr-text"><b>この画面は AIco ブランディング事業のトライアル用ダッシュボードです。</b>掲載されている原稿・変換文・配信準備情報は<b>検証中</b>のものであり、外部共有・転載・公開投稿は <b>verifier 通過後</b>に行うこと。<br>ブランド表記は <b>AIco</b>。本名・肩書・所属・<b>TOKYO MX 等の機密・顧客情報は不用意に出さない</b>。／ AI言語率 <b>≤ 30%</b>。</span>
-</div>
+<!-- ② トライアル注意書き/ガードレールBOXは UIノイズのため削除(取扱注意は README に保持) -->
+<!-- ⑦ TODO: Phase 6 — YouTube storyboard system(トーク原稿 + 映像構成の専用ダッシュボード)。
+     YouTube は将来 Phase 3 の6媒体変換から構造分離し、独立フェーズ化する前提。今回は未実装。 -->
 
 <!-- ===== Phase 1: トピック候補(将来差し替え用の差込口つき) ===== -->
 <section id="phase-1" class="phase">
@@ -1429,7 +1461,7 @@
 <section id="phase-3" class="phase">
   <div class="phase-wrap">
     <h2 class="phase-title">③ distributor ダッシュボード</h2>
-    <p class="phase-sub">note 正本を起点に <strong>6媒体</strong>へ展開・比較・発信管理(編集OS)。「⚡ note正本から6媒体に変換」で各媒体へ下書きを自動生成 → カードで編集 → 発信準備OK に進める。<br>※ 外部AI API は未使用の簡易テンプレート変換です(英語化・精緻化は別途)。上限超過は自動トリム。</p>
+    <!-- ② 説明文(phase-sub)は削除(運用者は理解済・編集集中のため) -->
 
     <div class="p3-go-banner" id="p3-go-banner"></div>
     <div class="p3-warning" id="p3-warning"></div>
@@ -1560,15 +1592,19 @@
 <!-- Sticky control bar -->
 <div class="control-bar">
   <div class="control-inner">
-    <p class="control-hint">録音メモがなくても、原稿を確認してそのまま6媒体変換へ進めます。必要に応じて、現在の原稿とメモをmdファイルとして書き出せます。</p>
+    <p class="control-hint">下のメモは「話した要素を整理する<strong>素材メモ</strong>」です。原稿には自動で混ざりません。<strong>原稿へ反映</strong>で本文へ溶かし込み、<strong>6媒体変換へ進む</strong>で次工程へ。</p>
     <div class="control-row1">
       <button type="button" id="mic-btn" class="mic-btn"><span id="mic-icon">🎤</span><span id="mic-label">録音開始</span></button>
-      <div class="status" id="status">待機</div>
-      <button type="button" id="clear-btn" class="clear-btn">🗑️ クリア</button>
+      <button type="button" id="send-btn" class="send-btn"><span class="lbl-full">6媒体変換へ進む →</span><span class="lbl-short">変換へ</span></button>
+      <button type="button" id="clear-btn" class="clear-btn"><span class="lbl-full">🗑️ クリア</span><span class="lbl-short">クリア</span></button>
       <button type="button" id="export-btn" class="export-btn"><span class="lbl-full">⬇️ mdファイルで書き出す</span><span class="lbl-short">md書出</span></button>
-      <button type="button" id="send-btn" class="send-btn"><span class="lbl-full">6媒体変換へ進む →</span><span class="lbl-short">変換へ →</span></button>
     </div>
-    <textarea id="memo" class="memo-area" placeholder="🎤 を押して話す or ここに直接入力。録音停止のたびに [HH:MM:SS] 発話 の形で追記。手で編集してOK(誤変換修正、不要箇所削除)。"></textarea>
+    <div class="status" id="status">待機</div>
+    <div class="memo-toolbar">
+      <span class="memo-label">🎙 素材メモ（話した要素の整理用・本文とは別管理）</span>
+      <button type="button" id="reflect-btn" class="reflect-btn">⤵ 原稿へ反映</button>
+    </div>
+    <textarea id="memo" class="memo-area" placeholder="🎤 を押して話す or 直接入力。ここは“素材メモ”。原稿には自動で入りません。整えたら「原稿へ反映」で本文へ溶かし込みます。"></textarea>
   </div>
 </div>
 
@@ -1746,6 +1782,29 @@
     setPhase('3');
     showToast('③ 6媒体変換へ移動しました。', null, 1800);
   });
+
+  // ① 素材メモ → 原稿へ反映(ヒューリスティック / 非破壊・本文末尾に下書き追記。真の溶かし込みは手調整 or 将来API)
+  const reflectBtn = document.getElementById('reflect-btn');
+  if (reflectBtn) {
+    reflectBtn.addEventListener('click', function(){
+      const raw = (memoEl.value || '').trim();
+      if (!raw) { showToast('素材メモが空です。', 'warn', 2500); return; }
+      const lines = raw.replace(/\[\d{1,2}:\d{2}:\d{2}\]/g, '')
+        .split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+      const body = document.getElementById('content-v2');
+      if (!body) { showToast('本文(v2)が見つかりません。', 'error', 3000); return; }
+      const existing = body.innerText;
+      const fresh = lines.filter(function(l){ return existing.indexOf(l) === -1; }); // 既出は重複除外
+      if (!fresh.length) { showToast('反映できる新規要素がありません(既に本文にある内容です)。', 'warn', 3000); return; }
+      if (!confirm('素材メモの ' + fresh.length + ' 要素を本文末尾に下書きとして反映します。\n(溶かし込む位置・表現は後で手調整できます)')) return;
+      const p = document.createElement('p');
+      p.textContent = fresh.join(' ');
+      body.appendChild(p);
+      if (typeof saveEditedBody === 'function') saveEditedBody();
+      p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('⤵ 素材メモを本文末尾に下書き反映しました。文脈に合わせて手で整えてください。', null, 3200);
+    });
+  }
 
   // ---- 追加機能①: 録音メモのクリア ----
   const clearBtn = document.getElementById('clear-btn');
